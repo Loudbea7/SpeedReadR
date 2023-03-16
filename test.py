@@ -1364,6 +1364,7 @@ def load_settings():
     Path(books_path).mkdir(parents=True, exist_ok=True)
     
     # SETTINGS LOADED...
+    # starting global variables and db fix.
 
 def main():
     load_settings()
