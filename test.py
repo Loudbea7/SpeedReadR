@@ -226,6 +226,11 @@ class Speed_Read_R(MDApp):
             self.open_book(current_book)
             print("current book opened")
 
+            # self.set_cursor()
+            # self.reader_screen.grid_pager.children[0].focus = True
+
+            # self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(indx)
+
         # self.create_toolbar("Title")
         # self.select_screen("reader")
         print("returning root_screen")
@@ -337,6 +342,12 @@ class Speed_Read_R(MDApp):
         print('Starting show_pointer')
         self.show_pointer()
         print('Finished show_pointer')
+
+    @mainthread
+    def set_cursor(self):
+        self.reader_screen.grid_pager.children[0].focus = True
+
+        self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(indx)
         
 
     def post_settings(self, *kwargs):
@@ -887,12 +898,13 @@ class Speed_Read_R(MDApp):
         self.select_screen("reader", book_name)
 
         # self.root_screen.topbar.title = "Speed Read-R / " + book_name
+        
+        # self.reader_screen.grid_pager.children[0].focus = True
+        self.set_cursor()
 
         Clock.schedule_once(
             lambda x: self.reader_screen.grid_pager.children[0].select_text(indx, indx+len(word_index[index])
             ))
-
-        self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(indx)
 
     def clear_reader(self, *kwargs):
         global book_loaded
