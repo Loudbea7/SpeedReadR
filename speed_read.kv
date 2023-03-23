@@ -83,6 +83,8 @@
             spacing: "4dp"
             padding: "12dp", 0, 0, "56dp"
 
+        MDNavigationDrawerDivider:
+
         MDNavigationDrawerLabel:
             id: words_readed
             text: ""
@@ -693,18 +695,23 @@
         cols: 1
 
         MDGridLayout:
+            id: books_gr
             adaptive_height: True
-            pos_hint: {"top": 1}
-            padding: [dp(50), dp(20), dp(20), dp(20)]
+            pos_hint: {"top": .9}
+            do_scroll_x: False
+            padding: [dp(10), dp(10), dp(25), dp(10)]
             cols: 3
             MDLabel:
+                text: "Title"
+                font_style: "H6"
+                halign: "left"
                 adaptive_height: True
-                text: "Bookshelf"
-                font_size: 40
-                halign: "right"
             MDLabel:
-                text: ""
-
+                text: "Progress"
+                font_style: "H6"
+                halign: "center"
+                size_hint_x: .3
+                adaptive_height: True
             MDRectangleFlatButton:
                 text: "Reload"
                 pos_hint: {"center_x": .5, "center_y": .5}
@@ -718,36 +725,10 @@
             orientation: "horizontal"
             adaptive_height: True
             rgba: 0.7, 0.7, 0.7, 1
-        
-        MDGridLayout:
-            id: books_gr
-            adaptive_height: True
-            pos_hint: {"top": .9}
-            do_scroll_x: False
-            padding: [dp(10), dp(10), dp(10), dp(10)]
-            cols: 2
-            MDLabel:
-                text: "Title"
-                font_style: "H6"
-                halign: "center"
-                adaptive_height: True
-            MDLabel:
-                text: "Progress"
-                font_style: "H6"
-                halign: "center"
-                adaptive_height: True
-
-        Separator:
-            size_hint_y: None
-            pos_hint: {"top": 1}
-            height: dp(2)
-            orientation: "horizontal"
-            adaptive_height: True
-            rgba: 0.7, 0.7, 0.7, 1
 
         ScrollView:
             adaptive_height: True
-            pos_hint: {"top": .8} # W
+            pos_hint: {"top": .8}
             bar_width: 20
             scroll_type:["bars", "content"]
 
@@ -755,7 +736,7 @@
                 id: books_grid_1
                 adaptive_height: True
                 pos_hint: {"top": .9}
-                padding: [dp(10), dp(20), dp(20), dp(100)]
+                padding: [dp(10), dp(20), dp(25), dp(150)]
                 cols: 1
 
                 MDGridLayout:

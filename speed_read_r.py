@@ -7,6 +7,7 @@ import webbrowser
 import ast
 from typing import Union
 from threading import Thread
+from wakepy import set_keepawake, unset_keepawake
 
 from kivymd.app import MDApp
 from kivy.factory import Factory as F
@@ -185,18 +186,19 @@ class Speed_Read_R(MDApp):
     
     def nav_drawer_open(self):
         nav_drawer = self.root_screen.nav_drawer
+        
         self.root_screen.content_navigation.words_readed.text = str(self.active_dao.get_active().total)
+        
         self.root_screen.content_navigation.show_path.text = "..."+str(self.active_dao.get_active().path[-18:])
+        
         nav_drawer.set_state("open")
-        pass
-
+        
     def post_slot(self, *kwargs):
         exec(f"self.settings_screen.{self.active_dao.get_active().setting_active}.state = 'down'")
     
     def _set_slot(self, *kwargs):
-        print('Setting the slot!')
-        # self.set_slot(current_slot)
         self.set_slot(self.active_dao.get_active().setting_active)
+        
         self.update_WPM()
     
     def keep_button_up(self, *kwargs):
@@ -238,7 +240,8 @@ class Speed_Read_R(MDApp):
                 if key[0] in text_sett:
                     exec(f"self.settings_screen.{key[0]}.text = str({key[1]})")
             except Exception as e:
-                print("Error in post_settings: ", e)
+                # print("Error in post_settings: ", e)
+                self.snack(self, "Error in posting settings")
         
         self.settings_screen.pointer.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).pointer
         
@@ -283,7 +286,6 @@ class Speed_Read_R(MDApp):
     def set_theme(self, obj, theme, *kwargs):
         if theme != "":
             self.theme_cls.primary_palette = theme
-            print("THEME: ", theme)
             self.theme_dao.update_theme(color=theme)
             self.snack(self, "Restart the app to properly apply changes")
         else:
@@ -347,8 +349,6 @@ class Speed_Read_R(MDApp):
                 webbrowser.open('https://www.paypal.com/donate/?hosted_button_id=6LUSPTKGZFWCJ')
 
     def snack(self, obj, pop_text, *kwargs):
-        print("Snack obj", obj)
-        print("Snack text", pop_text)
         Snackbar(
             text=pop_text,
             snackbar_x="10dp",
@@ -410,8 +410,6 @@ class Speed_Read_R(MDApp):
         self.timed["blink_delay"] = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_delay / 1000
         
         if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).l_w_delay > 0:
-            print("Sett 2: ", self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).l_w_delay)
-
             self.timed["step"] = 60 / self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm / (self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).l_w_delay / 10)
 
         if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).l_w_delay <= 0:
@@ -428,7 +426,7 @@ class Speed_Read_R(MDApp):
             blink_color[3] = 0
         
         label_color = self.reader_screen.ids.pager_l.color
-        print("label color: ", label_color)
+        
         if blinker == "sett":
             self.settings_screen.ids.pager_sett_l.color = blink_color
             self.settings_screen.ids.pager_sett_l.text = "—"
@@ -474,10 +472,6 @@ class Speed_Read_R(MDApp):
         else:
             bookshelf = self.bookshelf_dao.read_bookshelf()
 
-            for i in range(len(bookshelf)):
-                print(i)
-                print(bookshelf[i].title)
-
             # for book in bookshelf:
             for i in range(len(bookshelf)):
                 title = BookListLabel(text=str(bookshelf[i].title), halign="left")
@@ -487,10 +481,9 @@ class Speed_Read_R(MDApp):
                     id= str(bookshelf[i].title),
                     on_release = lambda  x=bookshelf[i].title, *args: self.open_book(x, *args))
 
-                self.books_screen.ids.books_grid_2.add_widget(title)
-                self.books_screen.ids.books_grid_2.add_widget(data)
-                self.books_screen.ids.books_grid_2.add_widget(open_b)
-                print("Looking for error 3")
+                self.books_screen.books_grid_2.add_widget(title)
+                self.books_screen.books_grid_2.add_widget(data)
+                self.books_screen.books_grid_2.add_widget(open_b)
 
             self.bookshelf_loaded = True
 
@@ -565,10 +558,12 @@ class Speed_Read_R(MDApp):
 
     def unload_bookshelf(self, *kwargs):
         # Delete all elements from books_grid_2
-        row = [i for i in self.root_screen.books_grid_2.children]
+        # row = [i for i in self.root_screen.books_grid_2.children]
+        row = [i for i in self.books_screen.books_grid_2.children]
         
         for row1 in row:
-            self.root_screen.ids.books_grid_2.remove_widget(row1)
+            # self.root_screen.ids.books_grid_2.remove_widget(row1)
+            self.books_screen.books_grid_2.remove_widget(row1)
         self.bookshelf_loaded = False
 
     ''' Save text from quick text on a new file and open it on the reader '''
@@ -752,6 +747,8 @@ class Speed_Read_R(MDApp):
 
     ''' Iterate through words while self.play == True '''
     def play_reader(self, *args):
+        self.playing = False
+
         # Acceleration
         start_acc = False
         
@@ -777,7 +774,10 @@ class Speed_Read_R(MDApp):
         play_start = time.time()
 
         try:
-            while self.play and self.index < word_count:
+            set_keepawake(keep_screen_awake=True)
+            if self.play:
+                self.playing = True
+            while self.playing and self.index < word_count:
                 length = len(self.word_index[self.index])
                 chunk = splitter(self.word_index[self.index], length)
                 
@@ -790,6 +790,9 @@ class Speed_Read_R(MDApp):
                     )
 
                 self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx)
+                
+                if self.play != True:
+                    break
                 
                 delay(self.word_index[self.index], length, self.timed)
                 
@@ -833,18 +836,22 @@ class Speed_Read_R(MDApp):
                     self.time_left(self, word_count, play_start)
                     
                     self.reader_screen.index.text = str(self.index)
+                
             
             # Update read words count
             self.active_dao.update_active(total=self.active_dao.get_active().total+self.p_words)
         
         except KeyboardInterrupt:
             pass
+        unset_keepawake()
         
         # Stop player
         self.play = False
     
     ''' Open settings.txt, read settings, Iterate through words, update settings reader. '''
     def play_reader_sett(self, *args):
+        self.playing_sett = False
+        
         # Acceleration
         start_acc = False
 
@@ -882,7 +889,10 @@ class Speed_Read_R(MDApp):
         self.root_screen.pager_sett_r.text = str(chunk_sett[2])
         
         try:
-            while self.play_sett:
+            set_keepawake(keep_screen_awake=True)
+            if self.play_sett:
+                self.playing_sett = True
+            while self.playing_sett:
                 # Current word length
                 length = len(play_words[indx_sett])
 
@@ -892,6 +902,9 @@ class Speed_Read_R(MDApp):
                 self.root_screen.pager_sett_l.text = str(chunk_sett[0])
                 self.root_screen.pager_sett.text = str(chunk_sett[1])
                 self.root_screen.pager_sett_r.text = str(chunk_sett[2])
+
+                if self.play_sett != True:
+                    break
 
                 delay(play_words[indx_sett], length, self.timed)
                 
@@ -914,6 +927,7 @@ class Speed_Read_R(MDApp):
         
         except KeyboardInterrupt:
             pass
+        unset_keepawake()
         self.play_sett = False
 
     ''' Calculate average time left from (current speed/remaining length) and (current played words/elapsed time) '''
@@ -1019,8 +1033,6 @@ def delay(word, length, timed):
     # Word Length delay
     if timed["l_w_delay"] > 0:
         step_count = timed["step"] * length
-        print("step count: ", step_count)
-        print("formula: ", 1 / step_count / 1000)
 
         tot += step_count + (1 / step_count / 1000)
     
@@ -1050,3 +1062,4 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         print(e)
+        
