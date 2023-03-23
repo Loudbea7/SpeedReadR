@@ -7,6 +7,5 @@ class Bookshelf(SQLModel, table=True):
     title: str = "Readme.txt"
     hash: str = ""
     type: str = "text/plain"
-    # length: int = 0
     indx: int = 0
     progress: int = 0

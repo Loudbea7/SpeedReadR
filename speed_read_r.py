@@ -18,7 +18,6 @@ from kivy.clock import Clock, mainthread
 from kivy.config import Config
 from kivy.uix.textinput import TextInput
 from kivy.lang import Builder
-from kivymd.toast import toast
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.navigationdrawer import MDNavigationDrawer
 from kivymd.uix.snackbar import Snackbar
@@ -284,6 +283,7 @@ class Speed_Read_R(MDApp):
     def set_theme(self, obj, theme, *kwargs):
         if theme != "":
             self.theme_cls.primary_palette = theme
+            print("THEME: ", theme)
             self.theme_dao.update_theme(color=theme)
             self.snack(self, "Restart the app to properly apply changes")
         else:
@@ -648,19 +648,19 @@ class Speed_Read_R(MDApp):
         # match open book type
         match book.type:
             case "text/plain":
-                self.texted_book = Parsex.text(self.active_dao.get_active().path+book.title) # Read text
+                self.texted_book = Parsex.text(self.active_dao.get_active().path+book.title)
             case "application/epub+zip":
-                self.texted_book = Parsex.ebook(self.active_dao.get_active().path+book.title) # Read text
+                self.texted_book = Parsex.ebook(self.active_dao.get_active().path+book.title)
             case "application/pdf":
-                self.texted_book = Parsex.pdf(self.active_dao.get_active().path+book.title) # Read text
+                self.texted_book = Parsex.pdf(self.active_dao.get_active().path+book.title)
             case "text/markdown":
-                self.texted_book = Parsex.md(self.active_dao.get_active().path+book.title) # Read text
+                self.texted_book = Parsex.md(self.active_dao.get_active().path+book.title)
             case "application/rtf":
-                self.texted_book = Parsex.rtf(self.active_dao.get_active().path+book.title) # Read text
+                self.texted_book = Parsex.rtf(self.active_dao.get_active().path+book.title)
             case "application/x-tex":
-                self.texted_book = Parsex.text(self.active_dao.get_active().path+book.title) # Read text
+                self.texted_book = Parsex.text(self.active_dao.get_active().path+book.title)
             case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                self.texted_book = Parsex.docx(self.active_dao.get_active().path+book.title) # Read text
+                self.texted_book = Parsex.docx(self.active_dao.get_active().path+book.title)
 
         try:
             self.open_book_length = len(self.texted_book.split())
@@ -994,13 +994,16 @@ def splitter(word, length):
         # 3rd
     elif length <= 13:
         return [word[:3], word[3:4], word[4:]]
-        #4th
+        # 4th
     elif length <= 17:
         return [word[:4], word[4:5], word[5:]]
-        #4th
-    else:
+        # 5th
+    elif length <= 21:
         return [word[:5], word[5:6], word[6:]]
-        #5th
+        # 6th
+    else:
+        return [word[:6], word[6:7], word[7:]]
+        # 7th
 
 def delay(word, length, timed):
     tot = 0

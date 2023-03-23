@@ -34,7 +34,7 @@ class ThemeDAO:
         hue=None,
     ):
         with Session(engine) as db:
-            theme = db.get(Theme)
+            theme = db.exec(select(Theme)).all()[0]
             if theme:
                 if dark is not None:
                     theme.dark = dark

@@ -56,11 +56,8 @@ class BookshelfDAO:
                     bookshelf.indx = indx
                 if progress is not None:
                     bookshelf.progress = progress
-                print("adding new book..")
                 db.add(bookshelf)
-                print("commiting")
                 db.commit()
-                print("refreshing")
                 db.refresh(bookshelf)
                 return bookshelf
             else:
@@ -81,9 +78,7 @@ class BookshelfDAO:
         hash,
         ):
         with Session(engine) as db:
-            print("up hash 1")
             book = db.exec(select(Bookshelf).where(Bookshelf.title == title)).all()[0]
-            print("up hash 2", book)
             book.hash = hash
             book.indx = 0
             book.progress = 0
