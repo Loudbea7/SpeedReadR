@@ -56,7 +56,6 @@ class SettingsDAO:
         with Session(engine) as db:
             # settings = db.get(Settings, slot)
             settings = db.exec(select(Settings).where(Settings.active == slot )).all()[0]
-            print("SAVING SETTINGS: ", settings)
             if settings:
                 if active is not None:
                     settings.active = active
@@ -90,13 +89,9 @@ class SettingsDAO:
                     settings.blink_fade_toggle = blink_fade_toggle
                 if blink_fade is not None:
                     settings.blink_fade = blink_fade
-                print("All setted")
                 db.add(settings)
-                print("All added")
                 db.commit()
-                print("All comited")
                 db.refresh(settings)
-                print("All refreshed")
                 return settings
             else:
                 raise ValueError(f"Config {slot} not found.")

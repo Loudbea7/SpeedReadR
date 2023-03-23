@@ -40,8 +40,9 @@ class ActiveDAO:
         book=None,
         total=None
         ):
-        with Active(engine) as db:
-            active = db.get(Active)
+        with Session(engine) as db:
+            # active = db.get(Active)
+            active = db.exec(select(Active)).all()[0]
             if active:
                 if setting_active is not None:
                     active.setting_active = setting_active

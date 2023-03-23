@@ -33,7 +33,7 @@ class ThemeDAO:
         color=None,
         hue=None,
     ):
-        with Theme(engine) as db:
+        with Session(engine) as db:
             theme = db.get(Theme)
             if theme:
                 if dark is not None:

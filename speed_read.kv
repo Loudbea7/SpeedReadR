@@ -73,6 +73,7 @@
 
 <ContentNavigationDrawer>
     show_path: show_path.__self__
+    words_readed: words_readed.__self__
     MDNavigationDrawerMenu:
 
         MDNavigationDrawerHeader:
@@ -82,6 +83,14 @@
             spacing: "4dp"
             padding: "12dp", 0, 0, "56dp"
 
+        MDNavigationDrawerLabel:
+            id: words_readed
+            text: ""
+        MDNavigationDrawerLabel:
+            text: "Total words read"
+        
+        MDNavigationDrawerDivider:
+        
         MDNavigationDrawerLabel:
             text: "Menu"
 
@@ -142,7 +151,7 @@
 
         DrawerClickableItem:
             icon: "hand-coin"
-            text: "Donations"
+            text: "Donations & Contact"
             on_press:
                 root.nav_drawer.set_state("close")
                 app.select_screen("donations", "Thank you!!!")
@@ -154,6 +163,7 @@
     id: md_screen_reader
 
     fullscreen_button: fullscreen_button.__self__
+    p_button: p_button.__self__
     pager_l: pager_l.__self__
     pager: pager.__self__
     pager_r: pager_r.__self__
@@ -190,7 +200,7 @@
                     size_hint_y: None
                 MDLabel:
                     id: time_left
-                    text: "00:00"
+                    text: "00:00:00"
                     pos_hint: {"top": 1, "right": 1}
                     height: self.texture_size[1]
                     halign: "center"
@@ -338,7 +348,7 @@
             adaptive_height: True
             MDProgressBar:
                 id: p_bar_sett
-                value: 20
+                value: 100
                 pos_hint: {"top": 1}
                 size_hint: .8, None
 
@@ -1108,8 +1118,65 @@
                 adaptive_height: True
                 adaptive_width: True
                 pos_hint: {"top": 1}
-                padding: [dp(20), dp(20), dp(20), dp(100)]
+                padding: [dp(20), dp(10), dp(20), dp(100)]
                 spacing: [0, dp(20)]
+                
+                MDLabel:
+                    text: "Bitcoin"
+                    id: crypto
+                    halign: "center"
+                MDLabel:
+                    text: " "
+                Image:
+                    source: "./assets/bitcoin_logo.png"
+                    size_hint_x: None
+                MDRectangleFlatButton:
+                    text: "Copy address"
+                    on_release: app.copy_clipboard(self, "bitcoin")
+                
+                Separator:
+                    size_hint_y: None
+                    pos_hint: {"top": 1}
+                    height: dp(2)
+                    orientation: "horizontal"
+                    adaptive_height: True
+                    rgba: 0.7, 0.7, 0.7, 1
+                Separator:
+                    size_hint_y: None
+                    pos_hint: {"top": 1}
+                    height: dp(2)
+                    orientation: "horizontal"
+                    adaptive_height: True
+                    rgba: 0.7, 0.7, 0.7, 1
+                
+                MDLabel:
+                    text: "BNB"
+                    id: crypto
+                    halign: "center"
+                MDLabel:
+                    text: " "
+                Image:
+                    source: "./assets/bnb_logo.png"
+                    size_hint_x: None
+                MDRectangleFlatButton:
+                    text: "Copy address"
+                    on_release: app.copy_clipboard(self, "bnb")
+                
+                Separator:
+                    size_hint_y: None
+                    pos_hint: {"top": 1}
+                    height: dp(2)
+                    orientation: "horizontal"
+                    adaptive_height: True
+                    rgba: 0.7, 0.7, 0.7, 1
+                Separator:
+                    size_hint_y: None
+                    pos_hint: {"top": 1}
+                    height: dp(2)
+                    orientation: "horizontal"
+                    adaptive_height: True
+                    rgba: 0.7, 0.7, 0.7, 1
+                
                 MDLabel:
                     text: "Crypto (ERC-20)"
                     id: crypto
@@ -1122,6 +1189,7 @@
                 MDRectangleFlatButton:
                     text: "Copy address"
                     on_release: app.copy_clipboard(self, "crypto")
+                
                 Separator:
                     size_hint_y: None
                     pos_hint: {"top": 1}
@@ -1150,6 +1218,7 @@
                     text: "https://coindrop.to/loudbeat"
                     halign: "center"
                     on_release: app.copy_clipboard(self, "coindrop")
+                
                 Separator:
                     size_hint_y: None
                     pos_hint: {"top": 1}
@@ -1178,6 +1247,7 @@
                     text: "https://ko-fi.com/loudbeat"
                     halign: "center"
                     on_release: app.copy_clipboard(self, "kofi")
+                
                 Separator:
                     size_hint_y: None
                     pos_hint: {"top": 1}
@@ -1206,6 +1276,7 @@
                     text: "https://www.buymeacoffee.com/loudbeat"
                     halign: "center"
                     on_release: app.copy_clipboard(self, "coffee")
+                
                 Separator:
                     size_hint_y: None
                     pos_hint: {"top": 1}
@@ -1220,6 +1291,7 @@
                     orientation: "horizontal"
                     adaptive_height: True
                     rgba: 0.7, 0.7, 0.7, 1
+                
                 MDLabel:
                     text: "Paypal"
                     id: coffee
