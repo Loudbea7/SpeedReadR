@@ -11,7 +11,7 @@ class ThemeDAO:
 
     def read_theme(self):
         with Session(engine) as db:
-            theme = db.exec(select(Theme)).all()[0]
+            theme = db.exec(select(Theme)).all()
 
             return theme
 

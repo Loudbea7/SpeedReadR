@@ -20,3 +20,4 @@ class Settings(SQLModel, table=True):
     blink_color: str = "[0.62, 0.15, 0.04, 1]"
     blink_fade_toggle: bool = True
     blink_fade: int = 30
+    create_readme: bool = True

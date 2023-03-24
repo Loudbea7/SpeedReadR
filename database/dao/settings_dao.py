@@ -52,6 +52,7 @@ class SettingsDAO:
         blink_color=None,
         blink_fade_toggle=None,
         blink_fade=None,
+        create_readme=None
     ):
         with Session(engine) as db:
             # settings = db.get(Settings, slot)
@@ -89,12 +90,33 @@ class SettingsDAO:
                     settings.blink_fade_toggle = blink_fade_toggle
                 if blink_fade is not None:
                     settings.blink_fade = blink_fade
+                if create_readme is not None:
+                    settings.create_readme = create_readme
                 db.add(settings)
                 db.commit()
                 db.refresh(settings)
                 return settings
             else:
                 raise ValueError(f"Config {slot} not found.")
+
+    def create_readme_settings(self, readme: bool):
+        with Session(engine) as db:
+            # settings = db.get(Settings).all()
+            settings = db.exec(select(Settings)).all()
+            if settings:
+                settings[0].create_readme = readme
+                settings[1].create_readme = readme
+                settings[2].create_readme = readme
+                db.add(settings[0])
+                db.add(settings[1])
+                db.add(settings[2])
+                db.commit()
+                db.refresh(settings[0])
+                db.refresh(settings[1])
+                db.refresh(settings[2])
+                return settings
+            else:
+                raise ValueError(f"Config {readme} not found.")
 
     def delete_settings(self, slot: int):
         with Session(engine) as db:

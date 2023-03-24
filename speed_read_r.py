@@ -31,7 +31,7 @@ from kivymd.uix.toolbar import MDTopAppBar
 from kivymd.uix.filemanager import MDFileManager
 
 from database.text_parser import Parsex
-from database.utils import create_db_and_tables, clear_database, create_settings_text
+from database.utils import create_db_and_tables, clear_database, create_settings_text, create_readme
 from database.dao.settings_dao import SettingsDAO
 from database.dao.active_dao import ActiveDAO
 from database.dao.theme_dao import ThemeDAO
@@ -39,7 +39,6 @@ from database.dao.bookshelf_dao import BookshelfDAO
 
 # clear_database()
 create_db_and_tables()
-create_settings_text()
 
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
@@ -89,7 +88,15 @@ Builder.load_file(kv)
 ''' Build main app '''
 class Speed_Read_R(MDApp):    
     def build(self):
+        config_files = os.scandir(path="config/")
+        if not "settings.txt" in config_files:
+            try:
+                create_settings_text()
+            except:
+                self.snack(self, "Couldn't create settings file")
+        
         self.create_settings()
+        
         self.root_screen = RootScreen()
         
         # Playing reader
@@ -117,18 +124,28 @@ class Speed_Read_R(MDApp):
         self.old_index = None
 
         self.screen_manager = self.root_screen.screen_manager
-        self.settings_screen = SettingsScreen(name="sett",
-            )
+        self.settings_screen = SettingsScreen(name="sett")
         self.reader_screen = ReaderScreen(name="reader")
         self.books_screen = BooksScreen(name="books")
         self.clipboard_screen = ClipScreen(name="clipboard")
         self.donations_screen = DonationsScreen(name="donations")
         self.themes_screen = ThemesScreen(name="themes")
         
-        properties = ["reader_text_size", "blink_toggle", "blink_fade", "bg_text_size", "l_w_delay", "comma_delay", "pointer", "wpm", "progress_bar", "dot_delay", "blink_delay", "blink_interval", "accel", "blink_fade_toggle", "blink_color", "s1", "pager_sett_l", "pager_sett", "pager_sett_r"]
+        properties = ["reader_text_size", "blink_toggle", "blink_fade", "bg_text_size", "l_w_delay", "comma_delay", "pointer", "wpm", "progress_bar", "dot_delay", "blink_delay", "blink_interval", "accel", "blink_fade_toggle", "blink_color", "s1", "pager_sett_l", "pager_sett", "pager_sett_r", "create_readme"]
 
         for p in properties:
             exec(f"self.root_screen.{p} = self.settings_screen.{p}")
+        
+        files = []
+        for entry in os.scandir(self.active_dao.get_active().path):
+            if entry.is_file():
+                files.append(entry.name)
+        
+        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).create_readme and "Readme.txt" not in files:
+            try:
+                create_readme(self, path=self.active_dao.get_active().path)
+            except:
+                self.snack(self, "Couldn't create Readme.txt")
         
         self.screen_manager.add_widget(self.settings_screen)
         self.screen_manager.add_widget(self.reader_screen)
@@ -252,6 +269,9 @@ class Speed_Read_R(MDApp):
         self.settings_screen.blink_fade_toggle.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_fade_toggle
 
         self.settings_screen.blink_color.md_bg_color = ast.literal_eval(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_color)
+        
+        self.settings_screen.create_readme.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).create_readme
+        
         self.posting = False
 
     def reader_sett_set_size(self, *kwargs):
@@ -277,11 +297,11 @@ class Speed_Read_R(MDApp):
     
     def set_dark(self, obj, load, *kwargs):
         if load == "load":
-            self.theme_cls.theme_style = self.theme_dao.read_theme().dark
+            self.theme_cls.theme_style = self.theme_dao.read_theme()[0].dark
         else:
             self.theme_dao.update_theme(dark="Dark" if self.theme_cls.theme_style != "Dark" else "Light")
 
-            self.theme_cls.theme_style = self.theme_dao.read_theme().dark
+            self.theme_cls.theme_style = self.theme_dao.read_theme()[0].dark
 
     def set_theme(self, obj, theme, *kwargs):
         if theme != "":
@@ -289,7 +309,7 @@ class Speed_Read_R(MDApp):
             self.theme_dao.update_theme(color=theme)
             self.snack(self, "Restart the app to properly apply changes")
         else:
-            self.theme_cls.primary_palette = self.theme_dao.read_theme().color
+            self.theme_cls.primary_palette = self.theme_dao.read_theme()[0].color
 
     def set_hue(self, obj, hue, *kwargs):
         if hue != "":
@@ -297,7 +317,7 @@ class Speed_Read_R(MDApp):
             self.theme_dao.update_theme(hue=hue)
             self.snack(self, "Restart the app to properly apply changes")
         else:
-            self.theme_cls.primary_hue = self.theme_dao.read_theme().hue
+            self.theme_cls.primary_hue = self.theme_dao.read_theme()[0].hue
 
     def open_color_picker(self):
         color_picker = MDColorPicker(size_hint=(0.45, 0.85),
@@ -459,12 +479,14 @@ class Speed_Read_R(MDApp):
 
 
     def save_settings(self, key, value, *kwargs):
-        if self.posting:
-            pass
-        else:
-            exec(f"self.settings_dao.update_settings(slot=self.active_dao.get_active().setting_active, {key}={value})")
-            
-            self.set_timed()
+        if self.posting != True:
+            if key != "create_readme":
+                
+                exec(f"self.settings_dao.update_settings(slot=self.active_dao.get_active().setting_active, {key}={value})")
+                
+                self.set_timed()
+            else:
+                self.settings_dao.create_readme_settings(readme=value)
 
     def load_books(self, *kwargs):
         if self.bookshelf_loaded:
@@ -851,7 +873,7 @@ class Speed_Read_R(MDApp):
     ''' Open settings.txt, read settings, Iterate through words, update settings reader. '''
     def play_reader_sett(self, *args):
         self.playing_sett = False
-        
+
         # Acceleration
         start_acc = False
 
