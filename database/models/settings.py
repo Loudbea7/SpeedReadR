@@ -21,3 +21,4 @@ class Settings(SQLModel, table=True):
     blink_fade_toggle: bool = True
     blink_fade: int = 30
     create_readme: bool = True
+    missing_book: bool = False

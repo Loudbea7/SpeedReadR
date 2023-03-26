@@ -52,7 +52,8 @@ class SettingsDAO:
         blink_color=None,
         blink_fade_toggle=None,
         blink_fade=None,
-        create_readme=None
+        create_readme=None,
+        missing_book=None
     ):
         with Session(engine) as db:
             # settings = db.get(Settings, slot)
@@ -92,6 +93,8 @@ class SettingsDAO:
                     settings.blink_fade = blink_fade
                 if create_readme is not None:
                     settings.create_readme = create_readme
+                if missing_book is not None:
+                    settings.missing_book = missing_book
                 db.add(settings)
                 db.commit()
                 db.refresh(settings)

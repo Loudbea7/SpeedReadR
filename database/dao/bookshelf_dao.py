@@ -139,9 +139,24 @@ class BookshelfDAO:
             else:
                 raise ValueError(f"Can't write config")
 
-    def delete_bookshelf(self, title: int):
+    def delete_book(self, title: int):
         with Session(engine) as db:
-            bookshelf = db.get(Bookshelf, title)
+            print("1")
+            bookshelf = db.exec(select(Bookshelf).where(Bookshelf.title == title)).all()[0]
+            print("2")
+            if bookshelf:
+                print("3")
+                db.delete(bookshelf)
+                print("4")
+                db.commit()
+                print("5")
+                return bookshelf
+            else:
+                raise ValueError(f"Couldn't delete book")
+    
+    def delete_bookshelf(self):
+        with Session(engine) as db:
+            bookshelf = db.exec(select(Bookshelf)).all()
             if bookshelf:
                 db.delete(bookshelf)
                 db.commit()

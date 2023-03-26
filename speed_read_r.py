@@ -48,6 +48,9 @@ class BookListLabel(MDLabel):
 class BookButton(MDRectangleFlatIconButton):
     pass
 
+class BookButtonDelete(MDRectangleFlatIconButton):
+    pass
+
 class ContentNavigationDrawer(MDScrollView):
     screen_manager = ObjectProperty()
     nav_drawer = ObjectProperty()
@@ -82,12 +85,14 @@ class ThemesScreen(F.Screen):
     pass
 
 
-kv = "speed_read.kv"
-Builder.load_file(kv)
+# kv = "speed_read.kv"
+# Builder.load_file(kv)
 
 ''' Build main app '''
-class Speed_Read_R(MDApp):    
+class Speed_Read_RApp(MDApp):    
     def build(self):
+        self.icon = "assets/32x32.png"
+        
         config_files = os.scandir(path="config/")
         if not "settings.txt" in config_files:
             try:
@@ -131,7 +136,7 @@ class Speed_Read_R(MDApp):
         self.donations_screen = DonationsScreen(name="donations")
         self.themes_screen = ThemesScreen(name="themes")
         
-        properties = ["reader_text_size", "blink_toggle", "blink_fade", "bg_text_size", "l_w_delay", "comma_delay", "pointer", "wpm", "progress_bar", "dot_delay", "blink_delay", "blink_interval", "accel", "blink_fade_toggle", "blink_color", "s1", "pager_sett_l", "pager_sett", "pager_sett_r", "create_readme"]
+        properties = ["reader_text_size", "blink_toggle", "blink_fade", "bg_text_size", "l_w_delay", "comma_delay", "pointer", "wpm", "progress_bar", "dot_delay", "blink_delay", "blink_interval", "accel", "blink_fade_toggle", "blink_color", "s1", "pager_sett_l", "pager_sett", "pager_sett_r", "create_readme", "missing_book"]
 
         for p in properties:
             exec(f"self.root_screen.{p} = self.settings_screen.{p}")
@@ -271,6 +276,8 @@ class Speed_Read_R(MDApp):
         self.settings_screen.blink_color.md_bg_color = ast.literal_eval(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_color)
         
         self.settings_screen.create_readme.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).create_readme
+
+        self.settings_screen.missing_book.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).missing_book
         
         self.posting = False
 
@@ -493,19 +500,49 @@ class Speed_Read_R(MDApp):
             pass
         else:
             bookshelf = self.bookshelf_dao.read_bookshelf()
-
+            
+            files = []
+            for entry in os.scandir(self.active_dao.get_active().path):
+                if entry.is_file():
+                    files.append(entry.name)
+            
             # for book in bookshelf:
             for i in range(len(bookshelf)):
-                title = BookListLabel(text=str(bookshelf[i].title), halign="left")
-                data = BookListLabel(text=str(bookshelf[i].progress) + "%", halign="center", size_hint_x= .3)
-                
-                open_b = BookButton(
-                    id= str(bookshelf[i].title),
-                    on_release = lambda  x=bookshelf[i].title, *args: self.open_book(x, *args))
+                if bookshelf[i].title in files:
 
-                self.books_screen.books_grid_2.add_widget(title)
-                self.books_screen.books_grid_2.add_widget(data)
-                self.books_screen.books_grid_2.add_widget(open_b)
+                    delete_b = BookButtonDelete(
+                        id= str(bookshelf[i].title),
+                        on_release = lambda x=bookshelf[i].title, *args: self.delete_book(x, *args))
+                    
+                    title = BookListLabel(text=str(bookshelf[i].title), halign="left")
+                    data = BookListLabel(text=str(bookshelf[i].progress) + "%", halign="center", size_hint_x= .3)
+                    
+                    open_b = BookButton(
+                        id= str(bookshelf[i].title),
+                        on_release = lambda x=bookshelf[i].title, *args: self.open_book(x, *args))
+
+                    self.books_screen.books_grid_2.add_widget(delete_b)
+                    self.books_screen.books_grid_2.add_widget(title)
+                    self.books_screen.books_grid_2.add_widget(data)
+                    self.books_screen.books_grid_2.add_widget(open_b)
+                
+                elif bookshelf[i].title not in files and self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).missing_book:
+                    delete_b = BookButtonDelete(
+                        id= str(bookshelf[i].title),
+                        on_release = lambda x=bookshelf[i].title, *args: self.delete_book(x, *args))
+                    
+                    title = BookListLabel(text=str(bookshelf[i].title), strikethrough=True, halign="left")
+                    data = BookListLabel(text=str(bookshelf[i].progress) + "%", halign="center", size_hint_x= .3)
+                    
+                    open_b = BookButton(
+                        id= str(bookshelf[i].title),
+                        disabled = True,
+                        on_release = lambda x=bookshelf[i].title, *args: self.open_book(x, *args))
+
+                    self.books_screen.books_grid_2.add_widget(delete_b)
+                    self.books_screen.books_grid_2.add_widget(title)
+                    self.books_screen.books_grid_2.add_widget(data)
+                    self.books_screen.books_grid_2.add_widget(open_b)
 
             self.bookshelf_loaded = True
 
@@ -571,12 +608,13 @@ class Speed_Read_R(MDApp):
         if new_books >= 1:
             self.snack(self, str(new_books)+" new book/s found")
 
-            self.unload_bookshelf(self)
-            
-            self.load_books(self)
-
         else:
             self.snack(self, "No book found")
+            
+        self.unload_bookshelf(self)
+        
+        self.load_books(self)
+
 
     def unload_bookshelf(self, *kwargs):
         # Delete all elements from books_grid_2
@@ -587,6 +625,25 @@ class Speed_Read_R(MDApp):
             # self.root_screen.ids.books_grid_2.remove_widget(row1)
             self.books_screen.books_grid_2.remove_widget(row1)
         self.bookshelf_loaded = False
+
+    def delete_book(self, book):
+        self.bookshelf_dao.delete_book(title=book.id)
+
+        self.reload_bookshelf()
+
+    def clear_bookshelf(self):
+        files = []
+        for entry in os.scandir(self.active_dao.get_active().path):
+            if entry.is_file():
+                files.append(entry.name)
+        
+        bookshelf = self.bookshelf_dao.read_bookshelf()
+
+        for i in range(len(bookshelf)):
+            if bookshelf[i].title not in files:
+                self.bookshelf_dao.delete_book(title=bookshelf[i].title)
+        
+        self.reload_bookshelf()
 
     ''' Save text from quick text on a new file and open it on the reader '''
     def save_clip(self, obj, title, new_text, *kwargs):
@@ -1076,7 +1133,7 @@ def accel(secs, acc_amount):
         time.sleep(d)
 
 def main():
-    Speed_Read_R().run()
+    Speed_Read_RApp().run()
 
 
 if __name__ == "__main__":

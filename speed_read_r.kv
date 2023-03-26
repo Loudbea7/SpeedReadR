@@ -37,7 +37,7 @@
             pos: self.pos
             size: self.size
 
-<BookLIstLabel@MDLable>:
+<BookLIstLabel@MDLabel>:
     md_bg_color: app.theme_cls.bg_dark
     font_size:"22sp"
     padding:[5,5]
@@ -49,6 +49,12 @@
     padding:[20,0]
     text: " "
     icon: "book-open-page-variant"
+
+<BookButtonDelete>:
+    pos_hint:{"center_x":.5,"center_y":.5}
+    padding:[5,0]
+    text: " "
+    icon: "close-thick"
 
 
 <RootScreen>:
@@ -342,6 +348,7 @@
     pager_sett: pager_sett.__self__
     pager_sett_r: pager_sett_r.__self__
     create_readme: create_readme.__self__
+    missing_book: missing_book.__self__
     MDGridLayout:
         cols: 1
         pos_hint: {"top": 1}
@@ -690,6 +697,14 @@
                 MDSwitch:
                     id: create_readme
                     on_active: app.save_settings("create_readme", create_readme.active)
+                
+                MDLabel:
+                    text: "Show missing books"
+                    halign: "center"
+
+                MDSwitch:
+                    id: missing_book
+                    on_active: app.save_settings("missing_book", missing_book.active)
 
 
 
@@ -709,7 +724,13 @@
             pos_hint: {"top": .9}
             do_scroll_x: False
             padding: [dp(10), dp(10), dp(25), dp(10)]
-            cols: 3
+            cols: 4
+            MDRectangleFlatButton:
+                text: "Clear"
+                pos_hint: {"center_x": .5, "center_y": .5}
+                anchor_x: "left"
+                on_release: app.clear_bookshelf()
+                # padding: [dp(0), dp(0), dp(5), dp(0)]
             MDLabel:
                 text: "Title"
                 font_style: "H6"
@@ -752,8 +773,8 @@
                     id: books_grid_2
                     adaptive_height: True
                     pos_hint: {"top": .9}
-                    spacing: [0, dp(5)]
-                    cols: 3
+                    spacing: [0, dp(7)]
+                    cols: 4
 
 <ClipScreen>
     id: clip

@@ -10,7 +10,7 @@ WPM or word per minute is the main reading speed. A higher number will make the 
 
 Acceleration: This setting's unit is in seconds, here you'll set how many seconds the speed will keep increasing until it reaches the top speed you've set.
 
-Word length delay: You can set it to zero "0" to turn off this feature, this way every word will have the same delay no matter its length. Otherwise values greater than 1 will produce a longer delay for longer words and shorter delay for shorter words. Normal values could go between 40 adn 60, but you can achieve the same result changing the WPM, so there's no bood or bad. Have in mind that activating this feature will throw off the accurady of how many words per minute you'll actually get.
+Word length delay: You can set it to zero "0" to turn off this feature, this way every word will have the same delay no matter its length. Otherwise values greater than 1 will produce a longer delay for longer words and a shorter delay for shorter words. Normal values could go between 40 and 60, but you can achieve the same result by changing the WPM, so there's no good or bad. Have in mind that activating this feature will throw off the accuracy of how many words per minute you'll actually get.
 
 Dot and comma delay: Each one will simply add "X" amount of milliseconds to the delay if the word ends with one of them.
 
@@ -27,4 +27,8 @@ Blink fade time: This unit is also in seconds and it'll gradually fade the blink
 Blink color: Set the blink "-.-" color. Our vision has something called "persistence of vision" also known by many other names, which is a trait that makes us perceive "images" or more precisely "light" even after that light has stopped entering our eyes.
 Redish tones are the less energetic ones, and also the ones that less interfere with our sensitivity, so to avoid a possible ghosting image it's best to use some kind of red or orange tone. Or you can also turn off the fading feature and set a color with a fixed transparency to avoid being distracted.
 
-One last thing. This text will be auto-generated if the file "settings.txt" doesn't exist in the current Books file. However, you can change this text as you please, though, keep in mind that this file won't be parsed with any complexity other than a plain text file, so only write here with words separated by spaces.
+You can toggle off the option to create the "readme.txt" text on the selected book path every time the app opens.
+
+The last option hides the books that aren't found anymore on the selected folder, The stats of the index and progress aren't deleted unless you press the clear button or delete each individual book from the book menu.
+
+One last thing. This text will be auto-generated if the file "settings.txt" doesn't exist in the current Books file. However, you can change this text as you please, though, keep in mind that this file won't be parsed with any complexity other than a plain text file, so only write here with words separated by spaces always keeping the "*.txt" format.
