@@ -12,17 +12,23 @@ def clear_database():
     else:
         print("Database not found")
 
-
 def create_db_and_tables():
     from sqlmodel import SQLModel
     from .engine import engine
+    from pathlib import Path
+    import sqlite3
+
+    Path("./config").mkdir(parents=True, exist_ok=True)
+
+    config_path = os.listdir(os.path.join("./config", ''))
+
+    if not "settings.db" in config_path:
+        try:
+            sqlite3.connect("./config/settings.db")
+        except:
+            print("Can't create database")
 
     SQLModel.metadata.create_all(engine)
-
-# def create_settings_text():
-#     config_files = os.scandir(path="config/")
-#     if not "settings.txt" in config_files:
-#         create_settings()
 
 ''' Load settings reader text if it doesn't exist. '''
 def create_settings_text():

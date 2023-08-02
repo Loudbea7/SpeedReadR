@@ -1,10 +1,15 @@
 import os
 import sys
+
+if sys.__stdout__ is None or sys.__stderr__ is None:
+    os.environ['KIVY_NO_CONSOLELOG'] = '1'
+
 import time
 import mimetypes
 import hashlib
 import webbrowser
 import ast
+from pathlib import Path
 from typing import Union
 from threading import Thread
 from wakepy import set_keepawake, unset_keepawake
@@ -91,7 +96,7 @@ class ThemesScreen(F.Screen):
 ''' Build main app '''
 class Speed_Read_RApp(MDApp):    
     def build(self):
-        self.icon = "assets/32x32.png"
+        self.icon = "assets/64x64.png"
         
         config_files = os.scandir(path="config/")
         if not "settings.txt" in config_files:
@@ -141,6 +146,8 @@ class Speed_Read_RApp(MDApp):
         for p in properties:
             exec(f"self.root_screen.{p} = self.settings_screen.{p}")
         
+        Path(self.active_dao.get_active().path).mkdir(parents=True, exist_ok=True)
+
         files = []
         for entry in os.scandir(self.active_dao.get_active().path):
             if entry.is_file():
@@ -180,6 +187,18 @@ class Speed_Read_RApp(MDApp):
         
         return self.root_screen
     
+    def resource_path(self, relative_path):
+        if sys.platform.startswith("win32"):
+            """ Get absolute path to resource, works for dev and for PyInstaller """
+            base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+            return os.path.join(base_path, relative_path)
+        if sys.platform.startswith("darwin"):
+            pass
+        if sys.platform.startswith("linux"):
+            pass
+        else:
+            pass
+
     def create_settings(self):
         self.settings_dao = SettingsDAO()
         self.active_dao = ActiveDAO()
@@ -229,7 +248,7 @@ class Speed_Read_RApp(MDApp):
 
     @mainthread
     def update_WPM(self, *kwargs):
-        if self.root_screen.ids.screen_manager.current == "sett":
+        if self.screen_manager.current == "sett":
             self.settings_screen.ids.wpm.text = str(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm)
         self.reader_screen.ids.display_wpm.text = str(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm)
     
@@ -494,55 +513,56 @@ class Speed_Read_RApp(MDApp):
                 self.set_timed()
             else:
                 self.settings_dao.create_readme_settings(readme=value)
+        self.update_WPM(self)
 
     def load_books(self, *kwargs):
         if self.bookshelf_loaded:
-            pass
-        else:
-            bookshelf = self.bookshelf_dao.read_bookshelf()
-            
-            files = []
-            for entry in os.scandir(self.active_dao.get_active().path):
-                if entry.is_file():
-                    files.append(entry.name)
-            
-            # for book in bookshelf:
-            for i in range(len(bookshelf)):
-                if bookshelf[i].title in files:
+            self.unload_bookshelf(self)
+        
+        bookshelf = self.bookshelf_dao.read_bookshelf()
+        
+        files = []
+        for entry in os.scandir(self.active_dao.get_active().path):
+            if entry.is_file():
+                files.append(entry.name)
+        
+        # for book in bookshelf:
+        for i in range(len(bookshelf)):
+            if bookshelf[i].title in files:
 
-                    delete_b = BookButtonDelete(
-                        id= str(bookshelf[i].title),
-                        on_release = lambda x=bookshelf[i].title, *args: self.delete_book(x, *args))
-                    
-                    title = BookListLabel(text=str(bookshelf[i].title), halign="left")
-                    data = BookListLabel(text=str(bookshelf[i].progress) + "%", halign="center", size_hint_x= .3)
-                    
-                    open_b = BookButton(
-                        id= str(bookshelf[i].title),
-                        on_release = lambda x=bookshelf[i].title, *args: self.open_book(x, *args))
-
-                    self.books_screen.books_grid_2.add_widget(delete_b)
-                    self.books_screen.books_grid_2.add_widget(title)
-                    self.books_screen.books_grid_2.add_widget(data)
-                    self.books_screen.books_grid_2.add_widget(open_b)
+                delete_b = BookButtonDelete(
+                    id= str(bookshelf[i].title),
+                    on_release = lambda x=bookshelf[i].title, *args: self.delete_book(x, *args))
                 
-                elif bookshelf[i].title not in files and self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).missing_book:
-                    delete_b = BookButtonDelete(
-                        id= str(bookshelf[i].title),
-                        on_release = lambda x=bookshelf[i].title, *args: self.delete_book(x, *args))
-                    
-                    title = BookListLabel(text=str(bookshelf[i].title), strikethrough=True, halign="left")
-                    data = BookListLabel(text=str(bookshelf[i].progress) + "%", halign="center", size_hint_x= .3)
-                    
-                    open_b = BookButton(
-                        id= str(bookshelf[i].title),
-                        disabled = True,
-                        on_release = lambda x=bookshelf[i].title, *args: self.open_book(x, *args))
+                title = BookListLabel(text=str(bookshelf[i].title), halign="left")
+                data = BookListLabel(text=str(bookshelf[i].progress) + "%", halign="center", size_hint_x= .3)
+                
+                open_b = BookButton(
+                    id= str(bookshelf[i].title),
+                    on_release = lambda x=bookshelf[i].title, *args: self.open_book(x, *args))
 
-                    self.books_screen.books_grid_2.add_widget(delete_b)
-                    self.books_screen.books_grid_2.add_widget(title)
-                    self.books_screen.books_grid_2.add_widget(data)
-                    self.books_screen.books_grid_2.add_widget(open_b)
+                self.books_screen.books_grid_2.add_widget(delete_b)
+                self.books_screen.books_grid_2.add_widget(title)
+                self.books_screen.books_grid_2.add_widget(data)
+                self.books_screen.books_grid_2.add_widget(open_b)
+            
+            elif bookshelf[i].title not in files and self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).missing_book:
+                delete_b = BookButtonDelete(
+                    id= str(bookshelf[i].title),
+                    on_release = lambda x=bookshelf[i].title, *args: self.delete_book(x, *args))
+                
+                title = BookListLabel(text=str(bookshelf[i].title), strikethrough=True, halign="left")
+                data = BookListLabel(text=str(bookshelf[i].progress) + "%", halign="center", size_hint_x= .3)
+                
+                open_b = BookButton(
+                    id= str(bookshelf[i].title),
+                    disabled = True,
+                    on_release = lambda x=bookshelf[i].title, *args: self.open_book(x, *args))
+
+                self.books_screen.books_grid_2.add_widget(delete_b)
+                self.books_screen.books_grid_2.add_widget(title)
+                self.books_screen.books_grid_2.add_widget(data)
+                self.books_screen.books_grid_2.add_widget(open_b)
 
             self.bookshelf_loaded = True
 
@@ -1051,7 +1071,7 @@ class FixFileManager(MDFileManager):
     def back(self) -> None:
         """Returning to the branch down in the directory tree."""
 
-        if self.current_path[-1:] == "/":
+        if self.current_path[-1:] == "/" or self.current_path[-1:] == "\\":
             self.current_path = self.current_path[:-1]
 
         path, end = os.path.split(self.current_path)

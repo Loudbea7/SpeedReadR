@@ -93,7 +93,8 @@
 
         MDNavigationDrawerLabel:
             id: words_readed
-            text: ""
+            text: "000"
+
         MDNavigationDrawerLabel:
             text: "Total words read"
         
@@ -1096,7 +1097,7 @@
         MDCard:
             size_hint: .4, .45
             FitImage:
-                source: "./assets/Loudbeat_logo.png"
+                source: app.resource_path("assets/Loudbeat_logo.png")
                 width: 200
                 allow_stretch: True
         MDGridLayout:
@@ -1105,7 +1106,7 @@
             adaptive_width: True
             pos_hint: {"top": 1}
             Image:
-                source: "./assets/instagram_logo.png"
+                source: app.resource_path("assets/instagram_logo.png")
                 size_hint_x: None
             MDRectangleFlatButton:
                 text: "@loudbeat"
@@ -1139,7 +1140,7 @@
                 MDLabel:
                     text: " "
                 Image:
-                    source: "./assets/bitcoin_logo.png"
+                    source: app.resource_path("assets/bitcoin_logo.png")
                     size_hint_x: None
                 MDRectangleFlatButton:
                     text: "Copy address"
@@ -1167,7 +1168,7 @@
                 MDLabel:
                     text: " "
                 Image:
-                    source: "./assets/bnb_logo.png"
+                    source: app.resource_path("assets/bnb_logo.png")
                     size_hint_x: None
                 MDRectangleFlatButton:
                     text: "Copy address"
@@ -1195,7 +1196,7 @@
                 MDLabel:
                     text: " "
                 Image:
-                    source: "./assets/ethereum_logo.png"
+                    source: app.resource_path("assets/ethereum_logo.png")
                     size_hint_x: None
                 MDRectangleFlatButton:
                     text: "Copy address"
@@ -1223,7 +1224,7 @@
                 MDLabel:
                     text: " "
                 Image:
-                    source: "./assets/coindrop.png"
+                    source: app.resource_path("assets/coindrop.png")
                     size_hint_x: None
                 MDRectangleFlatButton:
                     text: "https://coindrop.to/loudbeat"
@@ -1252,7 +1253,7 @@
                 MDLabel:
                     text: " "
                 Image:
-                    source: "./assets/kofi.png"
+                    source: app.resource_path("assets/kofi.png")
                     size_hint_x: None
                 MDRectangleFlatButton:
                     text: "https://ko-fi.com/loudbeat"
@@ -1281,7 +1282,7 @@
                 MDLabel:
                     text: " "
                 Image:
-                    source: "./assets/buymeacoffee.png"
+                    source: app.resource_path("assets/buymeacoffee.png")
                     size_hint_x: None
                 MDRectangleFlatButton:
                     text: "https://www.buymeacoffee.com/loudbeat"
@@ -1310,7 +1311,7 @@
                 MDLabel:
                     text: " "
                 Image:
-                    source: "./assets/Paypal.png"
+                    source: app.resource_path("assets/Paypal.png")
                     size_hint_x: None
                 MDRectangleFlatButton:
                     text: "https://www.paypal.com/donate/?hosted_button_id=6LUSPTKGZFWCJ"
