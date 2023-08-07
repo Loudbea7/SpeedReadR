@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "speedreader"
-version = "0.1.0"
+version = "1.1.0"
 description = ""
-authors = ["ShootingStarDragon <rppapamaths@gmail.com>"]
+authors = ["Loudbeat"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

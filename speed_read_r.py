@@ -47,6 +47,8 @@ create_db_and_tables()
 
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 
+BASE_PATH = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+
 class BookListLabel(MDLabel):
     pass
 
@@ -103,7 +105,7 @@ class Speed_Read_RApp(MDApp):
             try:
                 create_settings_text()
             except:
-                self.snack(self, "Couldn't create settings file")
+                self.snack(self, "Error: Could not create settings file")
         
         self.create_settings()
         
@@ -146,18 +148,18 @@ class Speed_Read_RApp(MDApp):
         for p in properties:
             exec(f"self.root_screen.{p} = self.settings_screen.{p}")
         
-        Path(self.active_dao.get_active().path).mkdir(parents=True, exist_ok=True)
+        Path(os.path.abspath(self.active_dao.get_active().path)).mkdir(parents=True, exist_ok=True)
 
         files = []
-        for entry in os.scandir(self.active_dao.get_active().path):
+        for entry in os.scandir(os.path.abspath(self.active_dao.get_active().path)):
             if entry.is_file():
                 files.append(entry.name)
         
         if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).create_readme and "Readme.txt" not in files:
             try:
-                create_readme(self, path=self.active_dao.get_active().path)
+                create_readme(self, path=os.path.abspath(self.active_dao.get_active().path))
             except:
-                self.snack(self, "Couldn't create Readme.txt")
+                self.snack(self, 'Error: Could not create "Readme.txt"')
         
         self.screen_manager.add_widget(self.settings_screen)
         self.screen_manager.add_widget(self.reader_screen)
@@ -230,7 +232,7 @@ class Speed_Read_RApp(MDApp):
         
         self.root_screen.content_navigation.words_readed.text = str(self.active_dao.get_active().total)
         
-        self.root_screen.content_navigation.show_path.text = "..."+str(self.active_dao.get_active().path[-18:])
+        self.root_screen.content_navigation.show_path.text = "..."+str(os.path.abspath(self.active_dao.get_active().path)[-18:])
         
         nav_drawer.set_state("open")
         
@@ -282,7 +284,7 @@ class Speed_Read_RApp(MDApp):
                     exec(f"self.settings_screen.{key[0]}.text = str({key[1]})")
             except Exception as e:
                 # print("Error in post_settings: ", e)
-                self.snack(self, "Error in posting settings")
+                self.snack(self, "Error: Could not post settings")
         
         self.settings_screen.pointer.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).pointer
         
@@ -522,7 +524,7 @@ class Speed_Read_RApp(MDApp):
         bookshelf = self.bookshelf_dao.read_bookshelf()
         
         files = []
-        for entry in os.scandir(self.active_dao.get_active().path):
+        for entry in os.scandir(os.path.abspath(self.active_dao.get_active().path)):
             if entry.is_file():
                 files.append(entry.name)
         
@@ -570,7 +572,7 @@ class Speed_Read_RApp(MDApp):
         files = []
         new_books = 0
 
-        for entry in os.scandir(self.active_dao.get_active().path):
+        for entry in os.scandir(os.path.abspath(self.active_dao.get_active().path)):
             if entry.is_file():
                 files.append(entry.name)
         
@@ -596,10 +598,10 @@ class Speed_Read_RApp(MDApp):
             # "application/msword",
 
         for book in files:
-            book_type = mimetypes.guess_type(self.active_dao.get_active().path+book)[0]
+            book_type = mimetypes.guess_type(os.path.join(os.path.abspath(self.active_dao.get_active().path), book))[0]
             
             if book_type in suported:
-                book_hash = md5(self.active_dao.get_active().path+book)
+                book_hash = md5(os.path.join(os.path.abspath(self.active_dao.get_active().path), book))
                 old = False
                 
                 for bk in open_library:
@@ -629,7 +631,7 @@ class Speed_Read_RApp(MDApp):
             self.snack(self, str(new_books)+" new book/s found")
 
         else:
-            self.snack(self, "No book found")
+            self.snack(self, "Error: No book found")
             
         self.unload_bookshelf(self)
         
@@ -653,7 +655,7 @@ class Speed_Read_RApp(MDApp):
 
     def clear_bookshelf(self):
         files = []
-        for entry in os.scandir(self.active_dao.get_active().path):
+        for entry in os.scandir(os.path.abspath(self.active_dao.get_active().path)):
             if entry.is_file():
                 files.append(entry.name)
         
@@ -669,18 +671,18 @@ class Speed_Read_RApp(MDApp):
     def save_clip(self, obj, title, new_text, *kwargs):
         iter = 0
         
-        if os.path.exists(self.active_dao.get_active().path+title+".txt"):
-            while os.path.exists(self.active_dao.get_active().path+title+"_"+str(iter)+".txt"):
+        if os.path.exists(os.path.join(os.path.abspath(self.active_dao.get_active().path), title)+".txt"):
+            while os.path.exists(os.path.join(os.path.abspath(self.active_dao.get_active().path), title)+"_"+str(iter)+".txt"):
                 iter +=1
             title = title+"_"+str(iter)
         
         title = title+".txt"
         
-        with open(self.active_dao.get_active().path+title, "w") as new_t:
+        with open(os.path.join(os.path.abspath(self.active_dao.get_active().path), title), "w") as new_t:
             new_t.write(new_text)
 
-        clip_type = mimetypes.guess_type(self.active_dao.get_active().path+title)[0]
-        clip_hash = md5(self.active_dao.get_active().path+title)
+        clip_type = mimetypes.guess_type(os.path.join(os.path.abspath(self.active_dao.get_active().path), title))[0]
+        clip_hash = md5(os.path.join(os.path.abspath(self.active_dao.get_active().path), title))
 
         self.bookshelf_dao.update_bookshelf(title=title, hash=clip_hash, type=clip_type, indx=0, progress=0)
         
@@ -695,22 +697,27 @@ class Speed_Read_RApp(MDApp):
             select_path=self.select_path,
             selector="folder")
         
-        self.file_manager.show(os.path.expanduser(self.active_dao.get_active().path))
+        self.file_manager.show(os.path.expanduser(os.path.abspath(self.active_dao.get_active().path)))
         
         self.manager_open = True
 
     def select_path(self, books_pathx):
+        print("BOOKS PATH ", books_pathx)
+        print("BOOKS PATH ", self.resource_path(books_pathx))
+        print("REL PATH ", os.path.relpath(books_pathx))
+        print("REL PATH ", self.resource_path("VSCode"))
         try:
-            self.active_dao.update_active(path=books_pathx)
+            self.active_dao.update_active(path=os.path.relpath(books_pathx, BASE_PATH))
         
         except:
-            sys.exit("Can't load directory path settings")
+            self.snack(self, "Error: Can't load directory")
+            # sys.exit("Can't load directory path settings")
         
-        self.root_screen.show_path.text = "..."+str(self.active_dao.get_active().path[-18:])
+        self.root_screen.content_navigation.show_path.text = "..."+str(os.path.abspath(self.active_dao.get_active().path)[-18:])
         
         self.exit_manager()
         
-        self.snack(books_pathx)
+        self.snack(self, books_pathx)
     
     def exit_manager(self, *args):
         '''Called when the user reaches the root of the directory tree.'''
@@ -738,31 +745,45 @@ class Speed_Read_RApp(MDApp):
             self.active_dao.update_active(book=kwargs[0].id)
 
         book = self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book)
-
-        # match open book type
+        
+        path = os.path.abspath(self.active_dao.get_active().path)
+        
+        true_path = os.path.join(path, book.title)
+        
+        # Check if file exists
+        if os.path.exists(true_path) == False:
+            self.snack(self, "Error: File not found")
+            return
+        
+        # Match open book type
         match book.type:
             case "text/plain":
-                self.texted_book = Parsex.text(self.active_dao.get_active().path+book.title)
+                self.texted_book = Parsex.text(true_path)
             case "application/epub+zip":
-                self.texted_book = Parsex.ebook(self.active_dao.get_active().path+book.title)
+                self.texted_book = Parsex.ebook(true_path)
             case "application/pdf":
-                self.texted_book = Parsex.pdf(self.active_dao.get_active().path+book.title)
+                self.texted_book = Parsex.pdf(true_path)
             case "text/markdown":
-                self.texted_book = Parsex.md(self.active_dao.get_active().path+book.title)
+                self.texted_book = Parsex.md(true_path)
             case "application/rtf":
-                self.texted_book = Parsex.rtf(self.active_dao.get_active().path+book.title)
+                self.texted_book = Parsex.rtf(true_path)
             case "application/x-tex":
-                self.texted_book = Parsex.text(self.active_dao.get_active().path+book.title)
+                self.texted_book = Parsex.text(true_path)
             case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                self.texted_book = Parsex.docx(self.active_dao.get_active().path+book.title)
-
-        try:
-            self.open_book_length = len(self.texted_book.split())
-        except:
-            self.open_book_length = 0
+                self.texted_book = Parsex.docx(true_path)
 
         # Split book into separate words
-        self.word_index = self.texted_book.split()
+        try:
+            self.word_index = self.texted_book.split()
+        except:
+            self.snack(self, "Error: Could not proccess text")
+            return
+        
+        try:
+            self.open_book_length = len(self.word_index)
+        except:
+            self.snack(self, "Error: Could not proccess text length")
+            self.open_book_length = 0
         
         # Get read part of book
         cut = self.texted_book[:self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx]
@@ -911,7 +932,8 @@ class Speed_Read_RApp(MDApp):
                 # Get indx of next word
                 self.indx = self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx + length
                 try:
-                    while self.texted_book[self.indx] == " " or self.texted_book[self.indx] == "\n":
+                    while self.texted_book[self.indx] == " " or self.texted_book[self.indx] == "\n" or self.texted_book[self.indx].isprintable() == False:
+                    # while self.texted_book[self.indx] == " " or self.texted_book[self.indx].isprintable() == False:
                         self.indx += 1
                 except IndexError:
                     # If error or EOF reached, save words read and stop player.
@@ -969,6 +991,10 @@ class Speed_Read_RApp(MDApp):
         
         indx_sett = 0
         play_settings = ""
+        
+        if os.path.exists(os.path.join(os.path.abspath("config"), "settings.txt")) == False:
+            self.snack(self, "Error: Settings file not found")
+            return
         
         # Open settings text
         with open("./config/settings.txt", "r") as st:
