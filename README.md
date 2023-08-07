@@ -36,7 +36,7 @@ View [Speed Read-R app](https://github.com/loudbeatproductions/SpeedReadR).
 
 ## Known bugs
 
-- None
+- Total word count sometimes appear in two lines despite the string is not long wnough to be wrapped.
 
 
 ## About

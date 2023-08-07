@@ -15,10 +15,10 @@ def clear_database():
 def create_db_and_tables():
     from sqlmodel import SQLModel
     from .engine import engine
-    from pathlib import Path
     import sqlite3
 
-    Path("./config").mkdir(parents=True, exist_ok=True)
+    create_path("./config")
+    # Path("./config").mkdir(parents=True, exist_ok=True)
 
     config_path = os.listdir(os.path.join("./config", ''))
 
@@ -30,8 +30,10 @@ def create_db_and_tables():
 
     SQLModel.metadata.create_all(engine)
 
-def create_books_path():
-    Path("./Books").mkdir(parents=True, exist_ok=True)
+def create_path(new_path):
+    from pathlib import Path
+    Path(new_path).mkdir(parents=True, exist_ok=True)
+    # Path("./Books").mkdir(parents=True, exist_ok=True)
 
 
 ''' Load settings reader text if it doesn't exist. '''
@@ -46,10 +48,10 @@ def create_settings_text():
     except:
         sys.exit("Coudn't write new reader settings file")
 
-def create_readme(self, path):
+def create_readme(path):
     comp_readme = "eNptVsuO3DYQvOsruHPxIeN1gtz24geMIAPEiOF1YPjIkSgNdyRS5sOz8tenqilqdhPfJD76UV1dzfvZmE59Mrp7+UkdF/WXz93R6NQ0zXvbqcVndXb+Ih+tdirgpJp8MCqd8JsutuWnUVEM+V5+9HcT9GDktHVD2XzdNB+DiRF/mpe8SmFRNimf003TfDXxRr2d9A9cuFGH6F4kbL5uDpMerDPqhCim3J6Kd+t6HyadrHcS28XnsVNHuD6OYlu337KVgyU8PWFv8tklCdJO5lYduGejQrBctK5FwJEB67ZFpPZoR5sWmhOn2q25dzrpvfidckx0C2ftmc586EzgDeeT6vU4YvdkcZGfjMSZCz35SYBJ8DjF4v2aEc9dfEBGc/BdRizKANJFRdN61902zd85KLNgXTMurEtausA3Lgr259E8qkm38M5zCCH5wcB0UBebToA9qGPQ1kV1MWJnDiYhXUG5M9EOzvASytj6wdkfOKFTMsEVc70fRxbFfzeTcSneqs8nkoGJAVUQJEkmyTwmuhDudN5IaXPMQGSR23sxF72EtGXFq56hi6ETOMVYAMu5rMw6CHekjoAlmm/ZuBbWLifj6q15NiXBztMtAFgrcEUbnLBSG+Cb/EwvvW8zquIAbWf73gTkB96ipIzUOwSe6AR22RUxMRbco/mtyCCuQakOCVVg6cykRns2Wy8xdf6sOa/o9zqmAkgwOEEwJZV48vDxnMKF9sxr0ueCWA23Bb/vPfKMibDzgj7T2LQQQ1YvoL/26vACxMR5xMGWZXBMhMUo2XaeBJP2rv2cDFhff3R80oFpmW0rheV2yUOQkgA1moL8Q1nVMZMEJT2j7p/qEIoG3D54OAH/j2jppcgNewq+XkhXba0+gMNgz1RFiOxm8OyBgD4TJ/JjEElkydFNTq2N1tsAR9Ai8tfn4aQOLA9AjZr6RG8r61YdIXTIcc8mmW0yqGSUmoAz4KnkdPErk4UvpnRabTRqwZVXVA2QwF+wrxe00TsEfwCprEiGdeciU60gTIUCHswfoD6wikyz9GCVO9ihr9pkVzHcWA+A/0Tz6iORAqav1ZfVXYTtlmgKNclkWkN2a8Gh4weo8Vy4MliQGCKuiSAEHOmy6ZZ6+ka9eTJT/ong2F3T3JPMbU7xrkHpMQ7u1Dzq5dWsczRYuqtiXGv6y2+/qi8fPzTq/R1Qf7b1sm79cUeFG0CKPo9jxCHjmoaatHv1zvtz3Ek1dq8gFr0ddigBlC35YKuO5uSJTiEwnSTSifRlqiEXcAs9N5sidWg80+s8UpagrT14x4urjP2X3WuzRKoAyST3ITkio+JrzqwlWjjPM6DC7d6OVRgf0bYTmiukfq/MnI97NXf4hInHPeX2Vn1dNaZF2wwliGtg8gfK2G61q8zjPGKwhdoTCCQr20so1Czk+7aH8jOuRH4LN44EoFIO06Cro0V2nxuuohdxAOOF0x+XigXxVhRv9Lq77pzM2PMotJOLU1Hk0VIhaybhKqgzZ7A03CztbUo0Yg5x+63lgx1OiXPCIpSL8F6fN+2TE6gVoi4kQvY/w9NHK/NjffS0OUS/AoCx4TPlqR0ZE8N2Sz1I+RW5jyg3H03upy4/19G51QxTnuCvgPHh8piCboUd9cyuHroFTXbVdmF8KQkBYtdGRmnMDJ+skna6ZlOfKn12Lddw8ru2I/X2f8xC64scrsouAfu+MADMkbdA4dFFO5mRunvgo+lZQlWyq3r6p0CvwJQXkLzcBJxQtPR3FUefhIalnhvTdB2vmxs+5GQOre+1QsYV611ZYwY7QuAvsTJixkw2ZcQ8rwjKOx+9DvJMEoeUwlhOadHCssYc5CFZngp1dm78XHkC7FeqVgKA9eZacEItyNS52WkMpsl3Zn1CTaw1Ok5hbKT1mWYd9Wy/AdMFPHJKi0KWjpqOg/RYeeXKSJjW5y4eJDlleRz6B6jl1u8jMJG4ODa1O8enSv8vx4RgZw=="
     
     decoded_readme = zlib.decompress(base64.b64decode(comp_readme))
 
-    with open(path+"Readme.txt", "w") as new_readme:
+    with open(os.path.join(path, "Readme.txt"), "w") as new_readme:
         new_readme.write(decoded_readme.decode("utf-8"))

@@ -36,7 +36,7 @@ from kivymd.uix.toolbar import MDTopAppBar
 from kivymd.uix.filemanager import MDFileManager
 
 from database.text_parser import Parsex
-from database.utils import create_db_and_tables, clear_database, create_settings_text, create_readme
+from database.utils import create_db_and_tables, clear_database, create_settings_text, create_readme, create_path
 from database.dao.settings_dao import SettingsDAO
 from database.dao.active_dao import ActiveDAO
 from database.dao.theme_dao import ThemeDAO
@@ -148,7 +148,7 @@ class Speed_Read_RApp(MDApp):
         for p in properties:
             exec(f"self.root_screen.{p} = self.settings_screen.{p}")
         
-        Path(os.path.abspath(self.active_dao.get_active().path)).mkdir(parents=True, exist_ok=True)
+        create_path(self.active_dao.get_active().path)
 
         files = []
         for entry in os.scandir(os.path.abspath(self.active_dao.get_active().path)):
@@ -157,7 +157,7 @@ class Speed_Read_RApp(MDApp):
         
         if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).create_readme and "Readme.txt" not in files:
             try:
-                create_readme(self, path=os.path.abspath(self.active_dao.get_active().path))
+                create_readme(os.path.abspath(self.active_dao.get_active().path))
             except:
                 self.snack(self, 'Error: Could not create "Readme.txt"')
         
