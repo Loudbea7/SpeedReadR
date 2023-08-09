@@ -20,6 +20,7 @@
 - sqlmodel
 - striprtf
 - wakepy
+- more_itertools
 
 
 ## RUN

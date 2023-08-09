@@ -1,5 +1,6 @@
 import os
 import sys
+import more_itertools
 
 if sys.__stdout__ is None or sys.__stderr__ is None:
     os.environ['KIVY_NO_CONSOLELOG'] = '1'
@@ -42,7 +43,7 @@ from database.dao.active_dao import ActiveDAO
 from database.dao.theme_dao import ThemeDAO
 from database.dao.bookshelf_dao import BookshelfDAO
 
-# clear_database()
+# clear_database() # Warning! Database will be wiped!
 create_db_and_tables()
 
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
@@ -123,7 +124,8 @@ class Speed_Read_RApp(MDApp):
         # Currently posting settings
         self.posting = False
 
-        # The bookshelf only loads when is not loaded (first time open) and when button reload is clicked
+        # The bookshelf only loads when is not loaded (first time open)
+        # and when button reload is clicked
         self.bookshelf_loaded = False
 
         # screen cleans only if a book has been loaded
@@ -143,7 +145,28 @@ class Speed_Read_RApp(MDApp):
         self.donations_screen = DonationsScreen(name="donations")
         self.themes_screen = ThemesScreen(name="themes")
         
-        properties = ["reader_text_size", "blink_toggle", "blink_fade", "bg_text_size", "l_w_delay", "comma_delay", "pointer", "wpm", "progress_bar", "dot_delay", "blink_delay", "blink_interval", "accel", "blink_fade_toggle", "blink_color", "s1", "pager_sett_l", "pager_sett", "pager_sett_r", "create_readme", "missing_book"]
+        properties = [
+            "reader_text_size",
+            "blink_toggle",
+            "blink_fade",
+            "bg_text_size",
+            "l_w_delay",
+            "comma_delay",
+            "pointer", "wpm",
+            "progress_bar",
+            "dot_delay",
+            "blink_delay",
+            "blink_interval",
+            "accel",
+            "blink_fade_toggle",
+            "blink_color",
+            "s1",
+            "pager_sett_l",
+            "pager_sett",
+            "pager_sett_r",
+            "create_readme",
+            "missing_book"
+            ]
 
         for p in properties:
             exec(f"self.root_screen.{p} = self.settings_screen.{p}")
@@ -155,7 +178,8 @@ class Speed_Read_RApp(MDApp):
             if entry.is_file():
                 files.append(entry.name)
         
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).create_readme and "Readme.txt" not in files:
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).create_readme and "Readme.txt" not in files:
             try:
                 create_readme(os.path.abspath(self.active_dao.get_active().path))
             except:
@@ -184,22 +208,31 @@ class Speed_Read_RApp(MDApp):
 
             self.select_screen("reader", self.active_dao.get_active().book)
 
-        # Set size_hints param for fullscreen button (needs to be pressed once to activate)
+        # Set size_hints param for fullscreen button
+        # (needs to be pressed once to activate)
         self.full_screen()
         
         return self.root_screen
     
     def resource_path(self, relative_path):
-        if sys.platform.startswith("win32"):
-            """ Get absolute path to resource, works for dev and for PyInstaller """
-            base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-            return os.path.join(base_path, relative_path)
-        if sys.platform.startswith("darwin"):
-            pass
-        if sys.platform.startswith("linux"):
-            pass
-        else:
-            pass
+        return os.path.join(BASE_PATH, relative_path)
+        # if sys.platform.startswith("win32"):
+        #     """ Get absolute path to resource, works for dev and for PyInstaller """
+        #     # base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+            
+        #     return os.path.join(BASE_PATH, relative_path)
+        #     return os.path.join(base_path, relative_path)
+        # if sys.platform.startswith("darwin"):
+        #     pass
+        
+        # if sys.platform.startswith("linux"):
+        #     # base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        #     # return (base_path+"/"+relative_path) # First image wasn't loading ?
+            
+        #     return os.path.join(BASE_PATH, relative_path)
+        #     return os.path.join(base_path, relative_path)
+        # else:
+        #     pass
 
     def create_settings(self):
         self.settings_dao = SettingsDAO()
@@ -232,7 +265,8 @@ class Speed_Read_RApp(MDApp):
         
         self.root_screen.content_navigation.words_readed.text = str(self.active_dao.get_active().total)
         
-        self.root_screen.content_navigation.show_path.text = "..."+str(os.path.abspath(self.active_dao.get_active().path)[-18:])
+        self.root_screen.content_navigation.show_path.text = "..."+str(
+            os.path.abspath(self.active_dao.get_active().path)[-18:])
         
         nav_drawer.set_state("open")
         
@@ -251,8 +285,12 @@ class Speed_Read_RApp(MDApp):
     @mainthread
     def update_WPM(self, *kwargs):
         if self.screen_manager.current == "sett":
-            self.settings_screen.ids.wpm.text = str(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm)
-        self.reader_screen.ids.display_wpm.text = str(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm)
+            self.settings_screen.ids.wpm.text = str(
+                self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).wpm)
+        self.reader_screen.ids.display_wpm.text = str(
+            self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).wpm)
     
     def set_slot(self, slot, *kwargs):
         self.active_dao.update_active(setting_active=slot)
@@ -269,15 +307,28 @@ class Speed_Read_RApp(MDApp):
     def set_cursor(self):
         self.reader_screen.grid_pager.children[0].focus = True
 
-        self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(self.bookshelf_dao.get_book_title(self.active_dao.get_active().book).indx)
+        self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(
+            self.bookshelf_dao.get_book_title(self.active_dao.get_active().book).indx)
         
 
     def post_settings(self, *kwargs):
         self.posting = True
 
-        text_sett = ["reader_text_size","accel","l_w_delay","comma_delay","blink_delay","bg_text_size","wpm","dot_delay","blink_interval","blink_fade"]
+        text_sett = [
+            "reader_text_size",
+            "accel",
+            "l_w_delay",
+            "comma_delay",
+            "blink_delay",
+            "bg_text_size",
+            "wpm",
+            "dot_delay",
+            "blink_interval",
+            "blink_fade"
+            ]
 
-        for key in set(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active)):
+        for key in set(self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active)):
             from kivy.app import App
             try:
                 if key[0] in text_sett:
@@ -286,37 +337,52 @@ class Speed_Read_RApp(MDApp):
                 # print("Error in post_settings: ", e)
                 self.snack(self, "Error: Could not post settings")
         
-        self.settings_screen.pointer.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).pointer
+        self.settings_screen.pointer.active = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).pointer
         
-        self.settings_screen.blink_toggle.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_toggle
+        self.settings_screen.blink_toggle.active = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).blink_toggle
         
-        self.settings_screen.progress_bar.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).progress_bar
+        self.settings_screen.progress_bar.active = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).progress_bar
         
-        self.settings_screen.blink_fade_toggle.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_fade_toggle
+        self.settings_screen.blink_fade_toggle.active = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).blink_fade_toggle
 
-        self.settings_screen.blink_color.md_bg_color = ast.literal_eval(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_color)
+        self.settings_screen.blink_color.md_bg_color = ast.literal_eval(
+            self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).blink_color)
         
-        self.settings_screen.create_readme.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).create_readme
+        self.settings_screen.create_readme.active = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).create_readme
 
-        self.settings_screen.missing_book.active = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).missing_book
+        self.settings_screen.missing_book.active = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).missing_book
         
         self.posting = False
 
     def reader_sett_set_size(self, *kwargs):
-        self.settings_screen.ids.pager_sett_l.font_size = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).reader_text_size
+        self.settings_screen.ids.pager_sett_l.font_size = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).reader_text_size
         
-        self.settings_screen.ids.pager_sett.font_size = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).reader_text_size
+        self.settings_screen.ids.pager_sett.font_size = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).reader_text_size
         
-        self.settings_screen.ids.pager_sett_r.font_size = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).reader_text_size
+        self.settings_screen.ids.pager_sett_r.font_size = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).reader_text_size
         
-        self.reader_screen.ids.pager_l.font_size = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).reader_text_size
+        self.reader_screen.ids.pager_l.font_size = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).reader_text_size
         
-        self.reader_screen.ids.pager.font_size = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).reader_text_size
+        self.reader_screen.ids.pager.font_size = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).reader_text_size
         
-        self.reader_screen.ids.pager_r.font_size = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).reader_text_size
+        self.reader_screen.ids.pager_r.font_size = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).reader_text_size
 
     def show_pointer(self, *kwargs):
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).pointer == True:
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).pointer == True:
             self.settings_screen.ids.marker_sett.text = "|"
             self.reader_screen.ids.marker.text = "|"
         else:
@@ -327,7 +393,8 @@ class Speed_Read_RApp(MDApp):
         if load == "load":
             self.theme_cls.theme_style = self.theme_dao.read_theme()[0].dark
         else:
-            self.theme_dao.update_theme(dark="Dark" if self.theme_cls.theme_style != "Dark" else "Light")
+            self.theme_dao.update_theme(
+                dark="Dark" if self.theme_cls.theme_style != "Dark" else "Light")
 
             self.theme_cls.theme_style = self.theme_dao.read_theme()[0].dark
 
@@ -357,7 +424,8 @@ class Speed_Read_RApp(MDApp):
         )
 
     def update_color(self, color: list) -> None:
-        self.settings_dao.update_settings(slot=self.active_dao.get_active().setting_active, blink_color=color)
+        self.settings_dao.update_settings(
+            slot=self.active_dao.get_active().setting_active, blink_color=color)
         self.settings_screen.ids.blink_colorr.md_bg_color = color
     
     def get_selected_color(self,
@@ -375,6 +443,7 @@ class Speed_Read_RApp(MDApp):
         erc20 = "0x7c7C32E8400a2B9EecAD55f94f4F734bA520687f"
         btc = "bc1ql8vsr57vctxeqqm0ayer04j6lqgsc6gtpytley"
         bnb = "bnb1aheerja9dlfs6tsda5gq6aj3vzxhm2rjm4e620"
+        
         match site:
             case "bitcoin":
                 Clipboard.copy(btc)
@@ -393,8 +462,6 @@ class Speed_Read_RApp(MDApp):
                 webbrowser.open('https://www.buymeacoffee.com/loudbeat')
             case "ig":
                 webbrowser.open('https://www.instagram.com/loudbeat/')
-            case "paypal":
-                webbrowser.open('https://www.paypal.com/donate/?hosted_button_id=6LUSPTKGZFWCJ')
 
     def snack(self, obj, pop_text, *kwargs):
         Snackbar(
@@ -407,7 +474,11 @@ class Speed_Read_RApp(MDApp):
     def _keydown(self, obj, key, *args):
         pass
         
-    ''' Catch up keypress S = speed up +10 wpm, D = decrease -10 wpm, F = toggle fullscreen reader, Space = Play/Pause reader and settings reader'''
+    ''' Catch up keypress 
+    S = speed up +10 wpm,
+    D = decrease -10 wpm,
+    F = toggle fullscreen reader,
+    Space = Play/Pause reader and settings reader'''
     def _keyup(self, obj, key, *args):
         sm = self.screen_manager.current
         
@@ -419,29 +490,37 @@ class Speed_Read_RApp(MDApp):
                 self.play = True
                 self.reader_screen.ids.p_button.icon = "pause-circle"
                 Thread(target = self.play_reader).start()
+        
         if key == 32 and sm == "sett":
             if self.play_sett:
                 self.play_sett = False
             else:
                 self.play_sett = True
                 Thread(target = self.play_reader_sett).start()
+        
         if key == 115:
             Thread(target = self.speed_up).start()
+        
         if key == 100:
             Thread(target = self.speed_down).start()
+        
         if key == 102:
             Thread(target = self.full_screen).start()
             
 
     def speed_up(self):
-        self.settings_dao.update_settings(slot=self.active_dao.get_active().setting_active, wpm=self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm + 10)
+        self.settings_dao.update_settings(
+            slot=self.active_dao.get_active().setting_active, wpm=self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).wpm + 10)
         
         self.set_timed()
         
         self.update_WPM(self)
 
     def speed_down(self):
-        self.settings_dao.update_settings(slot=self.active_dao.get_active().setting_active, wpm=self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm - 10)
+        self.settings_dao.update_settings(
+            slot=self.active_dao.get_active().setting_active, wpm=self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).wpm - 10)
         
         self.set_timed()
         
@@ -449,28 +528,40 @@ class Speed_Read_RApp(MDApp):
 
     ''' Convert settings decimal to millisecond '''
     def set_timed(self):
-        self.timed["l_w_delay"] = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).l_w_delay / 1000
+        self.timed["l_w_delay"] = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).l_w_delay / 1000
         
-        self.timed["dot_delay"] = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).dot_delay / 1000
+        self.timed["dot_delay"] = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).dot_delay / 1000
         
-        self.timed["comma_delay"] = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).comma_delay / 1000
+        self.timed["comma_delay"] = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).comma_delay / 1000
         
-        self.timed["blink_delay"] = self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_delay / 1000
+        self.timed["blink_delay"] = self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).blink_delay / 1000
         
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).l_w_delay > 0:
-            self.timed["step"] = 60 / self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm / (self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).l_w_delay / 10)
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).l_w_delay > 0:
+            self.timed["step"] = 60 / self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).wpm / (self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).l_w_delay / 10)
 
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).l_w_delay <= 0:
-            self.timed["step"] = 60 / self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).l_w_delay <= 0:
+            self.timed["step"] = 60 / self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).wpm
 
     def full_screen(self, *kwargs):
         self.reader_screen.fullscreen_button.dispatch("on_release")
 
     def blink(self, start_time, blink_color, blinker):
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_fade_toggle == True and blink_color[3] > 0:
-            blink_color[3] = 1 - ((time.time() - start_time) / self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_fade)
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).blink_fade_toggle == True and blink_color[3] > 0:
+            blink_color[3] = 1 - ((time.time() - start_time) / self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).blink_fade)
 
-        elif self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_fade_toggle == True and blink_color[3] < 0:
+        elif self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).blink_fade_toggle == True and blink_color[3] < 0:
             blink_color[3] = 0
         
         label_color = self.reader_screen.ids.pager_l.color
@@ -528,7 +619,6 @@ class Speed_Read_RApp(MDApp):
             if entry.is_file():
                 files.append(entry.name)
         
-        # for book in bookshelf:
         for i in range(len(bookshelf)):
             if bookshelf[i].title in files:
 
@@ -548,13 +638,16 @@ class Speed_Read_RApp(MDApp):
                 self.books_screen.books_grid_2.add_widget(data)
                 self.books_screen.books_grid_2.add_widget(open_b)
             
-            elif bookshelf[i].title not in files and self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).missing_book:
+            elif bookshelf[i].title not in files and self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).missing_book:
                 delete_b = BookButtonDelete(
                     id= str(bookshelf[i].title),
                     on_release = lambda x=bookshelf[i].title, *args: self.delete_book(x, *args))
                 
-                title = BookListLabel(text=str(bookshelf[i].title), strikethrough=True, halign="left")
-                data = BookListLabel(text=str(bookshelf[i].progress) + "%", halign="center", size_hint_x= .3)
+                title = BookListLabel(text=str(
+                    bookshelf[i].title), strikethrough=True, halign="left")
+                data = BookListLabel(text=str(
+                    bookshelf[i].progress) + "%", halign="center", size_hint_x= .3)
                 
                 open_b = BookButton(
                     id= str(bookshelf[i].title),
@@ -598,10 +691,12 @@ class Speed_Read_RApp(MDApp):
             # "application/msword",
 
         for book in files:
-            book_type = mimetypes.guess_type(os.path.join(os.path.abspath(self.active_dao.get_active().path), book))[0]
+            book_type = mimetypes.guess_type(os.path.join(
+                os.path.abspath(self.active_dao.get_active().path), book))[0]
             
             if book_type in suported:
-                book_hash = md5(os.path.join(os.path.abspath(self.active_dao.get_active().path), book))
+                book_hash = md5(os.path.join(os.path.abspath(
+                    self.active_dao.get_active().path), book))
                 old = False
                 
                 for bk in open_library:
@@ -623,7 +718,8 @@ class Speed_Read_RApp(MDApp):
                             break
 
                 if not old:
-                    self.bookshelf_dao.create_bookshelf(title=book, hash=book_hash, type=book_type, indx=0, progress=0)
+                    self.bookshelf_dao.create_bookshelf(
+                        title=book, hash=book_hash, type=book_type, indx=0, progress=0)
 
                     new_books += 1
 
@@ -640,11 +736,9 @@ class Speed_Read_RApp(MDApp):
 
     def unload_bookshelf(self, *kwargs):
         # Delete all elements from books_grid_2
-        # row = [i for i in self.root_screen.books_grid_2.children]
         row = [i for i in self.books_screen.books_grid_2.children]
         
         for row1 in row:
-            # self.root_screen.ids.books_grid_2.remove_widget(row1)
             self.books_screen.books_grid_2.remove_widget(row1)
         self.bookshelf_loaded = False
 
@@ -671,20 +765,26 @@ class Speed_Read_RApp(MDApp):
     def save_clip(self, obj, title, new_text, *kwargs):
         iter = 0
         
-        if os.path.exists(os.path.join(os.path.abspath(self.active_dao.get_active().path), title)+".txt"):
-            while os.path.exists(os.path.join(os.path.abspath(self.active_dao.get_active().path), title)+"_"+str(iter)+".txt"):
+        if os.path.exists(os.path.join(os.path.abspath(
+            self.active_dao.get_active().path), title)+".txt"):
+            while os.path.exists(os.path.join(os.path.abspath(
+                self.active_dao.get_active().path), title)+"_"+str(iter)+".txt"):
                 iter +=1
             title = title+"_"+str(iter)
         
         title = title+".txt"
         
-        with open(os.path.join(os.path.abspath(self.active_dao.get_active().path), title), "w") as new_t:
+        with open(os.path.join(os.path.abspath(
+            self.active_dao.get_active().path), title), "w") as new_t:
             new_t.write(new_text)
 
-        clip_type = mimetypes.guess_type(os.path.join(os.path.abspath(self.active_dao.get_active().path), title))[0]
-        clip_hash = md5(os.path.join(os.path.abspath(self.active_dao.get_active().path), title))
+        clip_type = mimetypes.guess_type(os.path.join(
+            os.path.abspath(self.active_dao.get_active().path), title))[0]
+        clip_hash = md5(os.path.join(os.path.abspath(
+            self.active_dao.get_active().path), title))
 
-        self.bookshelf_dao.update_bookshelf(title=title, hash=clip_hash, type=clip_type, indx=0, progress=0)
+        self.bookshelf_dao.update_bookshelf(
+            title=title, hash=clip_hash, type=clip_type, indx=0, progress=0)
         
         self.active_dao.update_active(book=title)
         
@@ -697,15 +797,12 @@ class Speed_Read_RApp(MDApp):
             select_path=self.select_path,
             selector="folder")
         
-        self.file_manager.show(os.path.expanduser(os.path.abspath(self.active_dao.get_active().path)))
+        self.file_manager.show(os.path.expanduser(
+            os.path.abspath(self.active_dao.get_active().path)))
         
         self.manager_open = True
 
     def select_path(self, books_pathx):
-        print("BOOKS PATH ", books_pathx)
-        print("BOOKS PATH ", self.resource_path(books_pathx))
-        print("REL PATH ", os.path.relpath(books_pathx))
-        print("REL PATH ", self.resource_path("VSCode"))
         try:
             self.active_dao.update_active(path=os.path.relpath(books_pathx, BASE_PATH))
         
@@ -713,7 +810,8 @@ class Speed_Read_RApp(MDApp):
             self.snack(self, "Error: Can't load directory")
             # sys.exit("Can't load directory path settings")
         
-        self.root_screen.content_navigation.show_path.text = "..."+str(os.path.abspath(self.active_dao.get_active().path)[-18:])
+        self.root_screen.content_navigation.show_path.text = "..."+str(
+            os.path.abspath(self.active_dao.get_active().path)[-18:])
         
         self.exit_manager()
         
@@ -731,8 +829,18 @@ class Speed_Read_RApp(MDApp):
             if self.manager_open:
                 self.file_manager.back()
         return True
-
-    ''' Open selected book, parse text, load text into reader, set progress, cursor position, display title on top bar. '''
+    
+    ''' Generate iterator '''
+    def reader(self, text):
+        for words in text.split():
+            yield words
+    
+    ''' Open selected book,
+    parse text,
+    load text into reader,
+    set progress,
+    cursor position,
+    display title on top bar. '''
     def open_book(self, *kwargs):
         # Clear reader if loaded
         if self.book_loaded:
@@ -772,42 +880,53 @@ class Speed_Read_RApp(MDApp):
             case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
                 self.texted_book = Parsex.docx(true_path)
 
-        # Split book into separate words
+        # Create iterator
         try:
-            self.word_index = self.texted_book.split()
+            self.word_iter = more_itertools.seekable(self.reader(self.texted_book))
         except:
             self.snack(self, "Error: Could not proccess text")
             return
-        
+        print('ITER ', self.word_iter.peek())
         try:
-            self.open_book_length = len(self.word_index)
+            self.open_book_length = more_itertools.ilen(self.word_iter)
         except:
             self.snack(self, "Error: Could not proccess text length")
             self.open_book_length = 0
         
-        # Get read part of book
-        cut = self.texted_book[:self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx]
-
         # Word count readed text
-        self.index = len(cut.split())
+        self.index = more_itertools.ilen(
+            more_itertools.seekable(self.reader(
+            self.texted_book[:self.bookshelf_dao.get_book_title(
+            title=self.active_dao.get_active().book).indx])))
+
+        # Position iterator index
+        self.word_iter.seek(self.index)
         
         self.reader_screen.book_length.text = f"/{self.open_book_length}"
         
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).progress_bar:
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).progress_bar:
             if self.index == 0:
                 self.reader_screen.p_bar.value = 0
                 self.reader_screen.index.text = str(self.index)
+            
             else:
-                self.bookshelf_dao.update_param(title=self.active_dao.get_active().book, indx=self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx, progress=(int(self.index / self.open_book_length * 100)))
+                self.bookshelf_dao.update_param(
+                    title=self.active_dao.get_active().book, indx=self.bookshelf_dao.get_book_title(
+                    title=self.active_dao.get_active().book).indx, progress=(
+                    int(self.index / self.open_book_length * 100)))
                 
-                self.reader_screen.p_bar.value = self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).progress
+                self.reader_screen.p_bar.value = self.bookshelf_dao.get_book_title(
+                    title=self.active_dao.get_active().book).progress
+                
                 self.reader_screen.index.text = str(self.index)
+        
         else:
             self.reader_screen.p_bar.value = 0
             self.reader_screen.index.text = str(0)
 
         # Split current word and show in prompter
-        chunk = splitter(self.word_index[self.index], len(self.word_index[self.index]))
+        chunk = splitter(self.word_iter.peek(), len(self.word_iter.peek()))
         self.reader_screen.pager_l.text = str(chunk[0])
         self.reader_screen.pager.text = str(chunk[1])
         self.reader_screen.pager_r.text = str(chunk[2])
@@ -830,7 +949,11 @@ class Speed_Read_RApp(MDApp):
         self.set_cursor()
 
         Clock.schedule_once(
-            lambda x: self.reader_screen.grid_pager.children[0].select_text(self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx, self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx+len(self.word_index[self.index])
+            lambda x: self.reader_screen.grid_pager.children[0].select_text(
+            self.bookshelf_dao.get_book_title(
+            title=self.active_dao.get_active().book).indx, self.bookshelf_dao.get_book_title(
+            title=self.active_dao.get_active().book).indx+len(
+            self.word_iter.peek())
             ))
 
     def clear_reader(self, *kwargs):
@@ -840,7 +963,8 @@ class Speed_Read_RApp(MDApp):
 
     ''' Set new position for the reader. '''
     def click_text(self, *kwargs):
-        new_index = self.reader_screen.ids.grid_pager.children[0].cursor_index(self.reader_screen.ids.grid_pager.children[0].cursor)
+        new_index = self.reader_screen.ids.grid_pager.children[0].cursor_index(
+            self.reader_screen.ids.grid_pager.children[0].cursor)
         
         if new_index != self.old_index:
             self.old_index = new_index
@@ -850,17 +974,25 @@ class Speed_Read_RApp(MDApp):
                     break
                 new_index = new_index - 1
             
-            cut = self.texted_book[:new_index]
-            self.index = len(cut.split())
+            # Get new index
+            self.index = more_itertools.ilen(more_itertools.seekable(
+                self.reader(self.texted_book[:new_index])))
 
-            self.bookshelf_dao.update_param(title=self.active_dao.get_active().book, indx=new_index, progress=(int(self.index / self.open_book_length * 100)))
+            self.bookshelf_dao.update_param(
+                title=self.active_dao.get_active().book, indx=new_index, progress=(
+                int(self.index / self.open_book_length * 100)))
             
-            if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).progress_bar:
-                self.reader_screen.ids.p_bar.value = self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).progress
+            if self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).progress_bar:
+                self.reader_screen.ids.p_bar.value = self.bookshelf_dao.get_book_title(
+                    title=self.active_dao.get_active().book).progress
                 
                 self.reader_screen.ids.index.text = str(self.index)
 
-            chunk = splitter(self.word_index[self.index], len(self.word_index[self.index]))
+            # Change reader to new index
+            self.word_iter.seek(self.index)
+
+            chunk = splitter(self.word_iter.peek(), len(self.word_iter.peek()))
             self.reader_screen.ids.pager_l.text = str(chunk[0])
             self.reader_screen.ids.pager.text = str(chunk[1])
             self.reader_screen.ids.pager_r.text = str(chunk[2])
@@ -878,18 +1010,19 @@ class Speed_Read_RApp(MDApp):
         # Posted words count
         self.p_words = 0
 
-        # Total word count
-        word_count = len(self.word_index)
-        
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).accel > 0:
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).accel > 0:
             start_acc = True
             acceleration = time.time()
         
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_toggle:
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).blink_toggle:
             start_blink = True
             start_blink_t = time.time()
             loop_blink_t = time.time()
-            blink_color = ast.literal_eval(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_color)
+            blink_color = ast.literal_eval(
+                self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).blink_color)
         
         play_start = time.time()
 
@@ -897,64 +1030,86 @@ class Speed_Read_RApp(MDApp):
             set_keepawake(keep_screen_awake=True)
             if self.play:
                 self.playing = True
-            while self.playing and self.index < word_count:
-                length = len(self.word_index[self.index])
-                chunk = splitter(self.word_index[self.index], length)
+            while self.playing and self.index < self.open_book_length:
+                length = len(self.word_iter.peek())
+                chunk = splitter(self.word_iter.peek(), length)
                 
                 self.reader_screen.pager_l.text = str(chunk[0])
                 self.reader_screen.pager.text = str(chunk[1])
                 self.reader_screen.pager_r.text = str(chunk[2])
 
                 Clock.schedule_once(
-                    lambda x: self.reader_screen.grid_pager.children[0].select_text(self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx, (self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx + length))
+                    lambda x: self.reader_screen.grid_pager.children[0].select_text(
+                    self.bookshelf_dao.get_book_title(
+                    title=self.active_dao.get_active().book).indx, (
+                    self.bookshelf_dao.get_book_title(
+                    title=self.active_dao.get_active().book).indx + length))
                     )
 
-                self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx)
+                self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(
+                    self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx)
                 
                 if self.play != True:
                     break
                 
-                delay(self.word_index[self.index], length, self.timed)
+                delay(self.word_iter.peek(), length, self.timed)
                 
                 # Accelerate until set acceleration time reached
                 if start_acc == True:
-                    if time.time()-acceleration < int(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).accel):
-                        accel(acceleration, self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).accel)
+                    if time.time()-acceleration < int(
+                        self.settings_dao.get_setting(
+                        slot=self.active_dao.get_active().setting_active).accel):
+                        accel(acceleration, self.settings_dao.get_setting(
+                            slot=self.active_dao.get_active().setting_active).accel)
                     else:
                         start_acc = False
                 
                 # Blinking if active
                 if start_blink == True:
-                    if time.time() - loop_blink_t > int(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_interval):
+                    if time.time() - loop_blink_t > int(
+                        self.settings_dao.get_setting(
+                        slot=self.active_dao.get_active().setting_active).blink_interval):
                         blink_color = self.blink(start_blink_t, blink_color, "player")
                         loop_blink_t = time.time()
                 
                 # Get indx of next word
-                self.indx = self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx + length
+                self.indx = self.bookshelf_dao.get_book_title(
+                    title=self.active_dao.get_active().book).indx + length
                 try:
-                    while self.texted_book[self.indx] == " " or self.texted_book[self.indx] == "\n" or self.texted_book[self.indx].isprintable() == False:
+                    while self.texted_book[
+                        self.indx] == " " or self.texted_book[
+                            self.indx] == "\n" or self.texted_book[
+                                self.indx].isprintable() == False:
                     # while self.texted_book[self.indx] == " " or self.texted_book[self.indx].isprintable() == False:
                         self.indx += 1
+                
                 except IndexError:
                     # If error or EOF reached, save words read and stop player.
                     self.active_dao.update_active(total=self.active_dao.get_active().total+self.p_words)
                     
                     self.reader_screen.p_button.dispatch("on_release")
+
+                    self.snack(self, "Index Error!")
                     break
                 
                 # Get index of next word
                 self.index += 1
+                next(self.word_iter)
                 
                 # Set currently played words
                 self.p_words += 1
 
                 # Update progress
-                self.bookshelf_dao.update_param(title=self.active_dao.get_active().book, indx=self.indx, progress=int(self.index / self.open_book_length * 100))
+                self.bookshelf_dao.update_param(
+                    title=self.active_dao.get_active().book, indx=self.indx, progress=int(
+                    self.index / self.open_book_length * 100))
 
-                if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).progress_bar:
-                    self.reader_screen.p_bar.value = self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).progress
+                if self.settings_dao.get_setting(
+                    slot=self.active_dao.get_active().setting_active).progress_bar:
+                    self.reader_screen.p_bar.value = self.bookshelf_dao.get_book_title(
+                        title=self.active_dao.get_active().book).progress
                     
-                    self.time_left(self, word_count, play_start)
+                    self.time_left(self, self.open_book_length, play_start)
                     
                     self.reader_screen.index.text = str(self.index)
                 
@@ -969,7 +1124,10 @@ class Speed_Read_RApp(MDApp):
         # Stop player
         self.play = False
     
-    ''' Open settings.txt, read settings, Iterate through words, update settings reader. '''
+    ''' Open settings.txt,
+    read settings,
+    Iterate through words,
+    update settings reader. '''
     def play_reader_sett(self, *args):
         self.playing_sett = False
 
@@ -979,15 +1137,19 @@ class Speed_Read_RApp(MDApp):
         # Blinking
         start_blink = False
         
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).accel > 0:
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).accel > 0:
             start_acc = True
             acceleration = time.time()
         
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_toggle:
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).blink_toggle:
             start_blink = True
             start_blink_t = time.time()
             loop_blink_t = time.time()
-            blink_color = ast.literal_eval(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_color)
+            blink_color = ast.literal_eval(
+                self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).blink_color)
         
         indx_sett = 0
         play_settings = ""
@@ -1036,13 +1198,17 @@ class Speed_Read_RApp(MDApp):
                 indx_sett +=1
 
                 if start_acc == True:
-                    if time.time()-acceleration < int(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).accel):
-                        accel(acceleration, self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).accel)
+                    if time.time()-acceleration < int(
+                        self.settings_dao.get_setting(
+                        slot=self.active_dao.get_active().setting_active).accel):
+                        accel(acceleration, self.settings_dao.get_setting(
+                            slot=self.active_dao.get_active().setting_active).accel)
                     else:
                         start_acc = False
                 
                 if start_blink == True:
-                    if time.time() - loop_blink_t > int(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_interval):
+                    if time.time() - loop_blink_t > int(self.settings_dao.get_setting(
+                        slot=self.active_dao.get_active().setting_active).blink_interval):
                         blink_color = self.blink(start_blink_t, blink_color, "sett")
                         loop_blink_t = time.time()
                 
@@ -1055,19 +1221,24 @@ class Speed_Read_RApp(MDApp):
         unset_keepawake()
         self.play_sett = False
 
-    ''' Calculate average time left from (current speed/remaining length) and (current played words/elapsed time) '''
+    ''' Calculate average time left from (current speed/remaining length) and
+    (current played words/elapsed time) '''
     def time_left(self, obj, word_count, play_start, *kwargs):
         words_left = word_count - self.index
         
-        if self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_toggle:
+        if self.settings_dao.get_setting(
+            slot=self.active_dao.get_active().setting_active).blink_toggle:
             
             # Calculate time left based on formula
-            time_left = words_left / int(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm) * 100 / 60
+            time_left = words_left / int(self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).wpm) * 100 / 60
 
             # Calculate remaining blinks delay.
-            blinks_left = time_left / self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_interval
+            blinks_left = time_left / self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).blink_interval
 
-            delay_blinks_left = blinks_left * (self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).blink_delay / 1000)
+            delay_blinks_left = blinks_left * (self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).blink_delay / 1000)
             
             time_left += delay_blinks_left
             
@@ -1079,7 +1250,8 @@ class Speed_Read_RApp(MDApp):
         else:
             execution_left = (time.time() - play_start)/ self.p_words * words_left
 
-            time_left = words_left / int(self.settings_dao.get_setting(slot=self.active_dao.get_active().setting_active).wpm) * 100 / 60
+            time_left = words_left / int(self.settings_dao.get_setting(
+                slot=self.active_dao.get_active().setting_active).wpm) * 100 / 60
         
         # Average two time left results.
         t_left = (time_left + execution_left/60)/2
@@ -1111,7 +1283,9 @@ class FixFileManager(MDFileManager):
             else:
                 self.show(path)
 
-""" Hash the files to reference it by its content and know if they were modified to reset the index, otherwise can get index out of range error."""
+""" Hash the files to reference it by its content
+and know if they were modified to reset the index,
+otherwise can get index out of range error."""
 def md5(filename):
     h  = hashlib.md5()
     b  = bytearray(128*1024)
@@ -1180,7 +1354,6 @@ def accel(secs, acc_amount):
 
 def main():
     Speed_Read_RApp().run()
-
 
 if __name__ == "__main__":
     try:

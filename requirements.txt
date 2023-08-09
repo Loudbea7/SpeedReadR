@@ -7,3 +7,4 @@ pypdf==3.6.0
 sqlmodel==0.0.8
 striprtf==0.0.22
 wakepy==0.6.0
+more_itertools==10.1.0

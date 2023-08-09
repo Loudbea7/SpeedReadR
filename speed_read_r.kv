@@ -93,7 +93,7 @@
 
         MDNavigationDrawerLabel:
             id: words_readed
-            text: "000"
+            text: "0000000000"
 
         MDNavigationDrawerLabel:
             text: "Total words read"
@@ -1304,30 +1304,3 @@
                     adaptive_height: True
                     rgba: 0.7, 0.7, 0.7, 1
                 
-                MDLabel:
-                    text: "Paypal"
-                    id: coffee
-                    halign: "center"
-                MDLabel:
-                    text: " "
-                Image:
-                    source: app.resource_path("assets/Paypal.png")
-                    size_hint_x: None
-                MDRectangleFlatButton:
-                    text: "https://www.paypal.com/donate/?hosted_button_id=6LUSPTKGZFWCJ"
-                    halign: "center"
-                    on_release: app.copy_clipboard(self, "paypal")
-                Separator:
-                    size_hint_y: None
-                    pos_hint: {"top": 1}
-                    height: dp(2)
-                    orientation: "horizontal"
-                    adaptive_height: True
-                    rgba: 0.7, 0.7, 0.7, 1
-                Separator:
-                    size_hint_y: None
-                    pos_hint: {"top": 1}
-                    height: dp(2)
-                    orientation: "horizontal"
-                    adaptive_height: True
-                    rgba: 0.7, 0.7, 0.7, 1
