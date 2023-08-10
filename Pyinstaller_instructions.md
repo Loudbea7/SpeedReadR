@@ -72,6 +72,12 @@ When the spec file is done do:
 ```
 python -m PyInstaller main.spec
 ```
+# Ubuntu:
+After `python -m PyInstaller main.spec` getting `ModuleNotFoundError: No module named 'kivy_deps'`
+```
+pip install kivy-deps.sdl2
+pip install kivy-deps.glew
+```
 
 
 
@@ -171,6 +177,93 @@ build-backend = "poetry.core.masonry.api"
 
 ---
 # Linux:
+Linux doesn't need `sdl2` and `glew` nor `pypiwin32`
+
+# Ubuntu
+# .spec file example
+```
+# -*- mode: python ; coding: utf-8 -*-
+import os
+import sys
+from kivy.tools.packaging.pyinstaller_hooks import get_deps_minimal, \
+    get_deps_all, hookspath, runtime_hooks
+from kivymd import hooks_path as kivymd_hooks_path
+
+path = os.path.abspath(".")
+
+block_cipher = None
+
+a = Analysis(
+    ['/home/kivy/Desktop/SRR-Ubuntu/speed_read_r.py'],
+    pathex=[path],
+    binaries=[],
+    datas=[("/home/kivy/Desktop/SRR-Ubuntu/speed_read_r.kv", "."), ("/home/kivy/Desktop/SRR-Ubuntu/assets/*.*", "assets"), ("/home/kivy/Desktop/SRR-Ubuntu/database/*.py", "database"), ("/home/kivy/Desktop/SRR-Ubuntu/database/dao/*.py", "database/dao"), ("/home/kivy/Desktop/SRR-Ubuntu/database/models/*.py", "database/models")],
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name='SpeedReadR',
+    icon="/home/kivy/Desktop/SRR-Ubuntu/assets/256x256.ico",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=True,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
+```
+# .toml file example
+```
+[tool.poetry]
+name = "speedreader"
+version = "1.1.0"
+description = ""
+authors = ["Loudbeat"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.10.9"
+kivy = "^2.1.0"
+kivymd = "^1.1.1"
+ebooklib = "^0.18"
+pypdf = "^3.5.1"
+striprtf = "^0.0.22"
+bs4 = "^0.0.1"
+markdown = "^3.4.1"
+pyinstaller = "^5.8.0"
+docutils = "^0.19"
+pygments = "^2.14.0"
+more_itertools = "^10.1.0"
+kivy-deps-glew = "^0.3.1"
+kivy-deps-gstreamer = "^0.3.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+```
+# Arch
 
 # .spec file example
 ```

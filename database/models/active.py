@@ -3,7 +3,7 @@ from typing import Optional
 import os
 
 # def_path = os.path.abspath("./Books/")
-def_path = "/Books/"
+def_path = "Books/"
 def_path = os.path.join(def_path, '')
 
 class Active(SQLModel, table=True):
