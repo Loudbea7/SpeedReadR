@@ -13,7 +13,7 @@ import ast
 from pathlib import Path
 from typing import Union
 from threading import Thread
-from wakepy import set_keepawake, unset_keepawake
+from wakepy import keep
 
 from kivymd.app import MDApp
 from kivy.factory import Factory as F
@@ -886,7 +886,7 @@ class Speed_Read_RApp(MDApp):
         except:
             self.snack(self, "Error: Could not proccess text")
             return
-        print('ITER ', self.word_iter.peek())
+        
         try:
             self.open_book_length = more_itertools.ilen(self.word_iter)
         except:
@@ -1027,91 +1027,91 @@ class Speed_Read_RApp(MDApp):
         play_start = time.time()
 
         try:
-            set_keepawake(keep_screen_awake=True)
-            if self.play:
-                self.playing = True
-            while self.playing and self.index < self.open_book_length:
-                length = len(self.word_iter.peek())
-                chunk = splitter(self.word_iter.peek(), length)
-                
-                self.reader_screen.pager_l.text = str(chunk[0])
-                self.reader_screen.pager.text = str(chunk[1])
-                self.reader_screen.pager_r.text = str(chunk[2])
-
-                Clock.schedule_once(
-                    lambda x: self.reader_screen.grid_pager.children[0].select_text(
-                    self.bookshelf_dao.get_book_title(
-                    title=self.active_dao.get_active().book).indx, (
-                    self.bookshelf_dao.get_book_title(
-                    title=self.active_dao.get_active().book).indx + length))
-                    )
-
-                self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(
-                    self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx)
-                
-                if self.play != True:
-                    break
-                
-                delay(self.word_iter.peek(), length, self.timed)
-                
-                # Accelerate until set acceleration time reached
-                if start_acc == True:
-                    if time.time()-acceleration < int(
-                        self.settings_dao.get_setting(
-                        slot=self.active_dao.get_active().setting_active).accel):
-                        accel(acceleration, self.settings_dao.get_setting(
-                            slot=self.active_dao.get_active().setting_active).accel)
-                    else:
-                        start_acc = False
-                
-                # Blinking if active
-                if start_blink == True:
-                    if time.time() - loop_blink_t > int(
-                        self.settings_dao.get_setting(
-                        slot=self.active_dao.get_active().setting_active).blink_interval):
-                        blink_color = self.blink(start_blink_t, blink_color, "player")
-                        loop_blink_t = time.time()
-                
-                # Get indx of next word
-                self.indx = self.bookshelf_dao.get_book_title(
-                    title=self.active_dao.get_active().book).indx + length
-                try:
-                    while self.texted_book[
-                        self.indx] == " " or self.texted_book[
-                            self.indx] == "\n" or self.texted_book[
-                                self.indx].isprintable() == False:
-                    # while self.texted_book[self.indx] == " " or self.texted_book[self.indx].isprintable() == False:
-                        self.indx += 1
-                
-                except IndexError:
-                    # If error or EOF reached, save words read and stop player.
-                    self.active_dao.update_active(total=self.active_dao.get_active().total+self.p_words)
+            with keep.presenting() as k:
+                if self.play:
+                    self.playing = True
+                while self.playing and self.index < self.open_book_length:
+                    length = len(self.word_iter.peek())
+                    chunk = splitter(self.word_iter.peek(), length)
                     
-                    self.reader_screen.p_button.dispatch("on_release")
+                    self.reader_screen.pager_l.text = str(chunk[0])
+                    self.reader_screen.pager.text = str(chunk[1])
+                    self.reader_screen.pager_r.text = str(chunk[2])
 
-                    self.snack(self, "Index Error!")
-                    break
-                
-                # Get index of next word
-                self.index += 1
-                next(self.word_iter)
-                
-                # Set currently played words
-                self.p_words += 1
+                    Clock.schedule_once(
+                        lambda x: self.reader_screen.grid_pager.children[0].select_text(
+                        self.bookshelf_dao.get_book_title(
+                        title=self.active_dao.get_active().book).indx, (
+                        self.bookshelf_dao.get_book_title(
+                        title=self.active_dao.get_active().book).indx + length))
+                        )
 
-                # Update progress
-                self.bookshelf_dao.update_param(
-                    title=self.active_dao.get_active().book, indx=self.indx, progress=int(
-                    self.index / self.open_book_length * 100))
-
-                if self.settings_dao.get_setting(
-                    slot=self.active_dao.get_active().setting_active).progress_bar:
-                    self.reader_screen.p_bar.value = self.bookshelf_dao.get_book_title(
-                        title=self.active_dao.get_active().book).progress
+                    self.reader_screen.grid_pager.children[0].cursor = self.reader_screen.grid_pager.children[0].get_cursor_from_index(
+                        self.bookshelf_dao.get_book_title(title=self.active_dao.get_active().book).indx)
                     
-                    self.time_left(self, self.open_book_length, play_start)
+                    if self.play != True:
+                        break
                     
-                    self.reader_screen.index.text = str(self.index)
+                    delay(self.word_iter.peek(), length, self.timed)
+                    
+                    # Accelerate until set acceleration time reached
+                    if start_acc == True:
+                        if time.time()-acceleration < int(
+                            self.settings_dao.get_setting(
+                            slot=self.active_dao.get_active().setting_active).accel):
+                            accel(acceleration, self.settings_dao.get_setting(
+                                slot=self.active_dao.get_active().setting_active).accel)
+                        else:
+                            start_acc = False
+                    
+                    # Blinking if active
+                    if start_blink == True:
+                        if time.time() - loop_blink_t > int(
+                            self.settings_dao.get_setting(
+                            slot=self.active_dao.get_active().setting_active).blink_interval):
+                            blink_color = self.blink(start_blink_t, blink_color, "player")
+                            loop_blink_t = time.time()
+                    
+                    # Get indx of next word
+                    self.indx = self.bookshelf_dao.get_book_title(
+                        title=self.active_dao.get_active().book).indx + length
+                    try:
+                        while self.texted_book[
+                            self.indx] == " " or self.texted_book[
+                                self.indx] == "\n" or self.texted_book[
+                                    self.indx].isprintable() == False:
+                        # while self.texted_book[self.indx] == " " or self.texted_book[self.indx].isprintable() == False:
+                            self.indx += 1
+                    
+                    except IndexError:
+                        # If error or EOF reached, save words read and stop player.
+                        self.active_dao.update_active(total=self.active_dao.get_active().total+self.p_words)
+                        
+                        self.reader_screen.p_button.dispatch("on_release")
+
+                        self.snack(self, "Index Error!")
+                        break
+                    
+                    # Get index of next word
+                    self.index += 1
+                    next(self.word_iter)
+                    
+                    # Set currently played words
+                    self.p_words += 1
+
+                    # Update progress
+                    self.bookshelf_dao.update_param(
+                        title=self.active_dao.get_active().book, indx=self.indx, progress=int(
+                        self.index / self.open_book_length * 100))
+
+                    if self.settings_dao.get_setting(
+                        slot=self.active_dao.get_active().setting_active).progress_bar:
+                        self.reader_screen.p_bar.value = self.bookshelf_dao.get_book_title(
+                            title=self.active_dao.get_active().book).progress
+                        
+                        self.time_left(self, self.open_book_length, play_start)
+                        
+                        self.reader_screen.index.text = str(self.index)
                 
             
             # Update read words count
@@ -1119,7 +1119,6 @@ class Speed_Read_RApp(MDApp):
         
         except KeyboardInterrupt:
             pass
-        unset_keepawake()
         
         # Stop player
         self.play = False
@@ -1176,49 +1175,49 @@ class Speed_Read_RApp(MDApp):
         self.root_screen.pager_sett_r.text = str(chunk_sett[2])
         
         try:
-            set_keepawake(keep_screen_awake=True)
-            if self.play_sett:
-                self.playing_sett = True
-            while self.playing_sett:
-                # Current word length
-                length = len(play_words[indx_sett])
+            with keep.presenting() as k:
+                if self.play_sett:
+                    self.playing_sett = True
+                while self.playing_sett:
+                    # Current word length
+                    length = len(play_words[indx_sett])
 
-                # Split current word for prompter
-                chunk_sett = splitter(play_words[indx_sett], length)
+                    # Split current word for prompter
+                    chunk_sett = splitter(play_words[indx_sett], length)
 
-                self.root_screen.pager_sett_l.text = str(chunk_sett[0])
-                self.root_screen.pager_sett.text = str(chunk_sett[1])
-                self.root_screen.pager_sett_r.text = str(chunk_sett[2])
+                    self.root_screen.pager_sett_l.text = str(chunk_sett[0])
+                    self.root_screen.pager_sett.text = str(chunk_sett[1])
+                    self.root_screen.pager_sett_r.text = str(chunk_sett[2])
 
-                if self.play_sett != True:
-                    break
+                    if self.play_sett != True:
+                        break
 
-                delay(play_words[indx_sett], length, self.timed)
-                
-                indx_sett +=1
+                    delay(play_words[indx_sett], length, self.timed)
+                    
+                    indx_sett +=1
 
-                if start_acc == True:
-                    if time.time()-acceleration < int(
-                        self.settings_dao.get_setting(
-                        slot=self.active_dao.get_active().setting_active).accel):
-                        accel(acceleration, self.settings_dao.get_setting(
-                            slot=self.active_dao.get_active().setting_active).accel)
-                    else:
-                        start_acc = False
-                
-                if start_blink == True:
-                    if time.time() - loop_blink_t > int(self.settings_dao.get_setting(
-                        slot=self.active_dao.get_active().setting_active).blink_interval):
-                        blink_color = self.blink(start_blink_t, blink_color, "sett")
-                        loop_blink_t = time.time()
-                
-                # Loop text if EOF is reached.
-                if indx_sett == play_length:
-                    indx_sett = 0
+                    if start_acc == True:
+                        if time.time()-acceleration < int(
+                            self.settings_dao.get_setting(
+                            slot=self.active_dao.get_active().setting_active).accel):
+                            accel(acceleration, self.settings_dao.get_setting(
+                                slot=self.active_dao.get_active().setting_active).accel)
+                        else:
+                            start_acc = False
+                    
+                    if start_blink == True:
+                        if time.time() - loop_blink_t > int(self.settings_dao.get_setting(
+                            slot=self.active_dao.get_active().setting_active).blink_interval):
+                            blink_color = self.blink(start_blink_t, blink_color, "sett")
+                            loop_blink_t = time.time()
+                    
+                    # Loop text if EOF is reached.
+                    if indx_sett == play_length:
+                        indx_sett = 0
         
         except KeyboardInterrupt:
             pass
-        unset_keepawake()
+        
         self.play_sett = False
 
     ''' Calculate average time left from (current speed/remaining length) and
