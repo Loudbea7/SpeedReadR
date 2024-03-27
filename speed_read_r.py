@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Union
 from threading import Thread
 from wakepy import keep
+# from wakepy import set_keepawake, unset_keepawake
 
 from kivymd.app import MDApp
 from kivy.factory import Factory as F
@@ -1027,7 +1028,8 @@ class Speed_Read_RApp(MDApp):
         play_start = time.time()
 
         try:
-            with keep.presenting() as k:
+            with keep.presenting() as k:  # update for wakepy ^0.7.1
+            # set_keepawake(keep_screen_awake=True)   # Depercated version, use 'with keep.presenting() as k:'
                 if self.play:
                     self.playing = True
                 while self.playing and self.index < self.open_book_length:
@@ -1112,14 +1114,16 @@ class Speed_Read_RApp(MDApp):
                         self.time_left(self, self.open_book_length, play_start)
                         
                         self.reader_screen.index.text = str(self.index)
+                    
                 
-            
-            # Update read words count
-            self.active_dao.update_active(total=self.active_dao.get_active().total+self.p_words)
+                # Update read words count
+                self.active_dao.update_active(total=self.active_dao.get_active().total+self.p_words)
         
         except KeyboardInterrupt:
             pass
         
+        # unset_keepawake()    # Depercated version, use 'with keep.presenting() as k:'
+
         # Stop player
         self.play = False
     
@@ -1175,7 +1179,8 @@ class Speed_Read_RApp(MDApp):
         self.root_screen.pager_sett_r.text = str(chunk_sett[2])
         
         try:
-            with keep.presenting() as k:
+            with keep.presenting() as k:  # update for wakepy ^0.7.1
+            # set_keepawake(keep_screen_awake=True)   # Depercated version, use 'with keep.presenting() as k:'
                 if self.play_sett:
                     self.playing_sett = True
                 while self.playing_sett:
@@ -1217,6 +1222,8 @@ class Speed_Read_RApp(MDApp):
         
         except KeyboardInterrupt:
             pass
+        
+        # unset_keepawake()   # Depercated version, use 'with keep.presenting() as k:'
         
         self.play_sett = False
 
